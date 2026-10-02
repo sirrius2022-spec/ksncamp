@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>혼자 떠나기 좋은 1박 2일 국내 캠핑 여행지 4 | GQ Korea Style Camp Archive</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Tone.js for synthesized ambient soundscape -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <!-- Google Fonts: Editorial Serif & Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Noto+Serif+KR:wght@300;400;600;700&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            pastel: {
+              cream: '#faf7f2',      // 따뜻한 버터 크림 베이스
+              card: '#ffffff',       // 카드 백그라운드
+              sage: '#e2ece7',       // 세이지 민트 (자연)
+              sagedark: '#47695c',
+              blush: '#fbece5',      // 파스텔 살구 피치 (불멍/온기)
+              blushdark: '#a85b46',
+              sky: '#e8f0f8',        // 파스텔 소프트 스카이 (계곡/바다)
+              skydark: '#43688b',
+              lavender: '#efeaf5',   // 은은한 라벤더
+              lavenderdark: '#5e4e73',
+              border: '#eae4d9',
+              textPrimary: '#282522',
+              textSecondary: '#6e6962',
+              textMuted: '#9e968b'
+            }
+          },
+          fontFamily: {
+            serif: ['"Noto Serif KR"', 'serif'],
+            display: ['Cinzel', 'serif'],
+            sans: ['Pretendard', '-apple-system', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Smooth Pastel Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #faf7f2;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d8cfbe;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #b8ac97;
+    }
+
+    /* Magazine Text Balance */
+    .editorial-dropcap::first-letter {
+      font-family: 'Cinzel', serif;
+      float: left;
+      font-size: 3.5rem;
+      line-height: 0.85;
+      padding-top: 4px;
+      padding-right: 12px;
+      padding-bottom: 2px;
+      color: #47695c;
+      font-weight: 700;
+    }
+
+    /* Subtle Paper Texture */
+    .bg-paper {
+      background-image: radial-gradient(rgba(110, 105, 98, 0.05) 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+  </style>
+</head>
+<body class="bg-pastel-cream text-pastel-textPrimary font-sans antialiased bg-paper selection:bg-pastel-sage selection:text-pastel-sagedark">
+
+  <!-- Top Magazine Utility Bar -->
+  <div class="border-b border-pastel-border bg-white/70 backdrop-blur-md sticky top-0 z-40 transition-all">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <!-- Issue & Category -->
+      <div class="flex items-center gap-3">
+        <a href="#article-top" class="font-display tracking-[0.25em] text-xs font-bold uppercase text-pastel-textPrimary hover:opacity-70 transition-opacity">
+          GQ ESCAPE
+        </a>
+        <span class="text-pastel-border text-xs">|</span>
+        <span class="text-[11px] text-pastel-textSecondary tracking-wider font-medium uppercase hidden sm:inline">
+          Features · Solo Camping Tour
+        </span>
+      </div>
+
+      <!-- Center Date / Archive Indicator -->
+      <div class="text-[11px] tracking-widest text-pastel-textMuted uppercase font-mono hidden md:block">
+        Vol. 28 Autumn & Winter Edition
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Ambient Sound Button -->
+        <button id="bonfire-toggle" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-pastel-blush text-pastel-blushdark text-xs font-medium hover:bg-pastel-blush/80 transition-colors border border-pastel-blushdark/20">
+          <i data-lucide="flame" class="w-3.5 h-3.5"></i>
+          <span id="bonfire-nav-status">불멍 사운드</span>
+        </button>
+
+        <!-- Bookmark / Share Tool -->
+        <button onclick="copyCurrentLink()" class="p-2 rounded-full hover:bg-stone-100 text-pastel-textSecondary transition-colors" title="기사 링크 복사">
+          <i data-lucide="share-2" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Editorial Article Header (GQ Korea Signature Layout) -->
+  <header id="article-top" class="pt-12 pb-14 border-b border-pastel-border bg-gradient-to-b from-white/60 to-transparent">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <!-- Category Badge -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pastel-sage text-pastel-sagedark text-[11px] font-semibold tracking-widest uppercase mb-6">
+        <span>Travel & Camping Archive</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-pastel-textPrimary leading-tight tracking-tight mb-6">
+        혼자 떠나기 좋은 1박 2일<br class="hidden sm:inline"> 국내 캠핑 여행지 4
+      </h1>
+
+      <!-- Magazine Subtitle / Deck -->
+      <p class="text-base sm:text-lg text-pastel-textSecondary font-serif font-light max-w-2xl mx-auto leading-relaxed mb-8">
+        온전히 나만의 호흡으로 채우는 주말. 번잡한 도시의 소음을 벗어나 장작 타는 소리와 맑은 밤공기만을 벗 삼는 1박 2일 솔로 캠퍼의 완벽한 힐링 코스.
+      </p>
+
+      <!-- Byline & Editorial Metadata -->
+      <div class="flex flex-wrap items-center justify-center gap-4 text-xs text-pastel-textMuted border-t border-b border-pastel-border/60 py-3.5 max-w-xl mx-auto font-sans">
+        <span class="font-medium text-pastel-textPrimary">BY <strong>민우 (캠프 큐레이터)</strong></span>
+        <span>•</span>
+        <span>2026. 10. 02</span>
+        <span>•</span>
+        <span>5 MIN READ</span>
+        <span>•</span>
+        <span class="inline-flex items-center gap-1 text-pastel-sagedark font-medium">
+          <i data-lucide="compass" class="w-3.5 h-3.5"></i> 솔캠 가이드
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Article Body -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-16">
+
+    <!-- Editorial Intro Paragraph (Dropcap style) -->
+    <section class="max-w-3xl mx-auto text-base sm:text-lg leading-relaxed text-pastel-textPrimary/90 font-serif border-b border-pastel-border pb-12">
+      <p class="editorial-dropcap mb-6">
+        누군가와 보조를 맞추지 않아도 되는 자유로움, 트렁크에서 텐트를 꺼내 팩을 박고 장작불을 지피는 오롯한 혼자만의 시간은 현대인에게 가장 우아한 재충전의 방식입니다. 화려하고 복잡한 캠핑장 대신, 시선 닿는 곳마다 고즈넉한 여백이 있고 안전하며 1인 여행자에게 친절한 1박 2일 국내 스팟 4곳을 엄선했습니다.
+      </p>
+      
+      <!-- Quick Anchor Menu -->
+      <div class="mt-8 p-5 rounded-2xl bg-white/70 border border-pastel-border shadow-sm">
+        <p class="text-xs font-bold text-pastel-textPrimary uppercase tracking-wider font-display mb-3">Index · Editor's Selection</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans">
+          <a href="#spot-1" class="p-2.5 rounded-xl hover:bg-pastel-sage/50 text-pastel-textSecondary hover:text-pastel-sagedark transition-all flex items-center gap-2">
+            <span class="font-display font-bold text-pastel-sagedark">01</span> 강원 영월 삿갓봉 솔숲 & 동강
+          </a>
+          <a href="#spot-2" class="p-2.5 rounded-xl hover:bg-pastel-blush/50 text-pastel-textSecondary hover:text-pastel-blushdark transition-all flex items-center gap-2">
+            <span class="font-display font-bold text-pastel-blushdark">02</span> 충북 단양 남천계곡 & 소백산 자락
+          </a>
+          <a href="#spot-3" class="p-2.5 rounded-xl hover:bg-pastel-sky/50 text-pastel-textSecondary hover:text-pastel-skydark transition-all flex items-center gap-2">
+            <span class="font-display font-bold text-pastel-skydark">03</span> 강원 삼척 맹방 솔숲 & 덕풍계곡
+          </a>
+          <a href="#spot-4" class="p-2.5 rounded-xl hover:bg-pastel-lavender/50 text-pastel-textSecondary hover:text-pastel-lavenderdark transition-all flex items-center gap-2">
+            <span class="font-display font-bold text-pastel-lavenderdark">04</span> 전북 순창 용궐산 하늘길 & 섬진강변
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPOT 01 -->
+    <article id="spot-1" class="scroll-mt-20 group">
+      <!-- Article Number & Title -->
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="font-display text-4xl sm:text-5xl font-extrabold text-pastel-sagedark tracking-tighter">01</span>
+        <div>
+          <span class="text-xs font-bold text-pastel-sagedark uppercase tracking-widest font-mono">FOREST & RIVER</span>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-pastel-textPrimary mt-0.5">
+            강원 영월 삿갓봉 솔숲 & 동강변
+          </h2>
+        </div>
+      </div>
+      <p class="text-xs sm:text-sm text-pastel-textMuted font-mono mb-5">
+        강원도 영월군 영월읍 동강로 일원 · 서울 기준 약 2시간 10분
+      </p>
+
+      <!-- Editorial Visual -->
+      <div class="rounded-3xl overflow-hidden shadow-sm border border-pastel-border bg-stone-100 mb-6 relative">
+        <img 
+          src="https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=1200&q=80" 
+          alt="영월 솔숲 캠핑 풍경" 
+          class="w-full h-72 sm:h-96 object-cover hover:scale-102 transition-transform duration-700 ease-out"
+          onerror="this.src='https://placehold.co/1000x600/e2ece7/47695c?text=Yeongwol+Forest'"
+        />
+        <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-sans text-pastel-textPrimary shadow-sm">
+          📸 텐트 문을 열면 동강의 물안개가 발밑까지 밀려온다.
+        </div>
+      </div>
+
+      <!-- Editorial Content -->
+      <div class="space-y-4 font-serif text-pastel-textPrimary leading-relaxed text-sm sm:text-base">
+        <p>
+          혼자 떠나는 여행에서 가장 중요한 것은 ‘나만의 페이스’를 방해받지 않는 고요함입니다. 영월 동강 줄기를 따라 굽이치는 삿갓봉 자락은 웅장한 침엽수림과 맑은 물빛이 병풍처럼 둘러싸인 곳입니다. 해 질 무렵 강물 위에 붉은 노을이 내려앉을 때면 인디언 행어에 드립 포트를 걸고 원두를 갈기에 완벽한 시간이 찾아옵니다.
+        </p>
+
+        <!-- GQ Magazine Detail Box -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6 font-sans text-xs">
+          <div class="p-4 rounded-2xl bg-pastel-sage/40 border border-pastel-sagedark/15">
+            <span class="font-bold text-pastel-sagedark block mb-1">🌿 솔캠 추천 포인트</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              완벽한 매너 타임 관리와 파쇄석 사이트. 사이트 간격이 넓어 혼자서도 독립된 쉼을 누릴 수 있습니다.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-cream border border-pastel-border">
+            <span class="font-bold text-pastel-textPrimary block mb-1">🚗 1박 2일 동선 팁</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              1일 차: 영월 서부시장 메밀전병 포장 → 오후 피칭 → 2일 차: 젊은달와이파크 예술 산책 후 귀가.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-sage/40 border border-pastel-sagedark/15">
+            <span class="font-bold text-pastel-sagedark block mb-1">⛺ 에디터의 장비 조언</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              일교차가 10도 이상 벌어집니다. 3계절용 경량 다운 침낭과 따뜻한 울 양말은 필수입니다.
+            </p>
+          </div>
+        </div>
+
+        <blockquote class="border-l-2 border-pastel-sagedark pl-4 italic text-pastel-textSecondary my-4 text-xs sm:text-sm">
+          “어둠이 내리면 전자기기를 모두 끄고 화로대의 잔불만 응시해 보세요. 장작이 타는 40분 동안 온전한 내면의 대화가 시작됩니다.”
+        </blockquote>
+      </div>
+    </article>
+
+    <!-- SPOT 02 -->
+    <article id="spot-2" class="scroll-mt-20 pt-10 border-t border-pastel-border group">
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="font-display text-4xl sm:text-5xl font-extrabold text-pastel-blushdark tracking-tighter">02</span>
+        <div>
+          <span class="text-xs font-bold text-pastel-blushdark uppercase tracking-widest font-mono">VALLEY & MOUNTAIN</span>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-pastel-textPrimary mt-0.5">
+            충북 단양 남천계곡 & 소백산 자락
+          </h2>
+        </div>
+      </div>
+      <p class="text-xs sm:text-sm text-pastel-textMuted font-mono mb-5">
+        충청북도 단양군 영춘면 남천리 · KTX 단양역 연계 렌터카 추천
+      </p>
+
+      <div class="rounded-3xl overflow-hidden shadow-sm border border-pastel-border bg-stone-100 mb-6 relative">
+        <img 
+          src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1200&q=80" 
+          alt="단양 소백산 자락 캠핑" 
+          class="w-full h-72 sm:h-96 object-cover hover:scale-102 transition-transform duration-700 ease-out"
+          onerror="this.src='https://placehold.co/1000x600/fbece5/a85b46?text=Danyang+Mountain'"
+        />
+        <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-sans text-pastel-textPrimary shadow-sm">
+          📸 바위틈으로 흐르는 청명한 물소리가 자연의 백색 소음이 된다.
+        </div>
+      </div>
+
+      <div class="space-y-4 font-serif text-pastel-textPrimary leading-relaxed text-sm sm:text-base">
+        <p>
+          단양은 웅장한 기암괴석과 맑은 계곡물이 어우러져 한 폭의 진경산수화를 닮은 고장입니다. 남천계곡은 국립공원 구역과 맞닿아 있어 천연림의 울창함이 남다릅니다. 차가운 물에 손을 담그고 나뭇잎 사이로 부서져 내리는 햇살을 바라보며 시집 한 권을 읽기에 더없이 좋습니다.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6 font-sans text-xs">
+          <div class="p-4 rounded-2xl bg-pastel-blush/40 border border-pastel-blushdark/15">
+            <span class="font-bold text-pastel-blushdark block mb-1">🍂 솔캠 추천 포인트</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              혼자서도 부담 없이 산책할 수 있는 무장애 데크로드가 계곡을 따라 길게 이어집니다.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-cream border border-pastel-border">
+            <span class="font-bold text-pastel-textPrimary block mb-1">🚗 1박 2일 동선 팁</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              1일 차: 도담삼봉 관람 후 캠핑장 체크인 → 2일 차: 카페 산(CAFE SANN)에서 활공장 패러글라이딩 구경.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-blush/40 border border-pastel-blushdark/15">
+            <span class="font-bold text-pastel-blushdark block mb-1">⛺ 에디터의 장비 조언</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              계곡 특유의 높은 습도를 막기 위해 지면 방수 방습 매트(그라운드시트)를 꼼꼼히 챙기세요.
+            </p>
+          </div>
+        </div>
+
+        <blockquote class="border-l-2 border-pastel-blushdark pl-4 italic text-pastel-textSecondary my-4 text-xs sm:text-sm">
+          “혼자 하는 여행의 미덕은 거창한 계획을 세우지 않아도 된다는 것. 그저 멍하니 흘러가는 물을 바라보는 것만으로 충분합니다.”
+        </blockquote>
+      </div>
+    </article>
+
+    <!-- SPOT 03 -->
+    <article id="spot-3" class="scroll-mt-20 pt-10 border-t border-pastel-border group">
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="font-display text-4xl sm:text-5xl font-extrabold text-pastel-skydark tracking-tighter">03</span>
+        <div>
+          <span class="text-xs font-bold text-pastel-skydark uppercase tracking-widest font-mono">OCEAN & PINE FOREST</span>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-pastel-textPrimary mt-0.5">
+            강원 삼척 맹방 해송숲 & 덕산 해변
+          </h2>
+        </div>
+      </div>
+      <p class="text-xs sm:text-sm text-pastel-textMuted font-mono mb-5">
+        강원도 삼척시 근덕면 삼척로 · 동해 바다와 울창한 해송림의 조화
+      </p>
+
+      <div class="rounded-3xl overflow-hidden shadow-sm border border-pastel-border bg-stone-100 mb-6 relative">
+        <img 
+          src="https://images.unsplash.com/photo-1537905569824-f89f14cceb68?auto=format&fit=crop&w=1200&q=80" 
+          alt="삼척 맹방 해송숲 캠핑" 
+          class="w-full h-72 sm:h-96 object-cover hover:scale-102 transition-transform duration-700 ease-out"
+          onerror="this.src='https://placehold.co/1000x600/e8f0f8/43688b?text=Samcheok+Beach'"
+        />
+        <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-sans text-pastel-textPrimary shadow-sm">
+          📸 해송 사이로 불어오는 짭조름한 바닷바람과 수평선의 일출.
+        </div>
+      </div>
+
+      <div class="space-y-4 font-serif text-pastel-textPrimary leading-relaxed text-sm sm:text-base">
+        <p>
+          파도 소리를 베개 삼아 하룻밤을 보내고 싶은 바다 캠퍼라면 삼척 맹방 해송숲을 빼놓을 수 없습니다. 수령 수십 년의 소나무들이 방풍림을 이루고 있어 거센 바닷바람을 막아주며, 모래사장 위로 부서지는 파도는 밤새도록 마음을 차분히 씻어내 줍니다. 아침에 텐트 지퍼를 열었을 때 펼쳐지는 붉은 일출은 평생 잊히지 않을 장관입니다.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6 font-sans text-xs">
+          <div class="p-4 rounded-2xl bg-pastel-sky/40 border border-pastel-skydark/15">
+            <span class="font-bold text-pastel-skydark block mb-1">🌊 솔캠 추천 포인트</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              바다와 솔숲을 동시에 즐기는 차박 및 백패킹 텐트 세팅 모두 최적화되어 있습니다.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-cream border border-pastel-border">
+            <span class="font-bold text-pastel-textPrimary block mb-1">🚗 1박 2일 동선 팁</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              1일 차: 삼척 중앙시장 문어비빔밥 혼밥 → 해질녘 해안산책로 러닝 → 2일 차: 새천년해안도로 드라이브.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-sky/40 border border-pastel-skydark/15">
+            <span class="font-bold text-pastel-skydark block mb-1">⛺ 에디터의 장비 조언</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              모래밭 피칭 시 일반 팩은 헛돌기 쉽습니다. 샌드 펙(모래용 플라스틱 펙)이나 큰 돌을 확보하세요.
+            </p>
+          </div>
+        </div>
+
+        <blockquote class="border-l-2 border-pastel-skydark pl-4 italic text-pastel-textSecondary my-4 text-xs sm:text-sm">
+          “끝없이 펼쳐진 수평선을 혼자 바라보고 있으면 마음속에 쌓여 있던 불필요한 번뇌들이 거짓말처럼 가라앉습니다.”
+        </blockquote>
+      </div>
+    </article>
+
+    <!-- SPOT 04 -->
+    <article id="spot-4" class="scroll-mt-20 pt-10 border-t border-pastel-border group">
+      <div class="flex items-baseline gap-3 mb-3">
+        <span class="font-display text-4xl sm:text-5xl font-extrabold text-pastel-lavenderdark tracking-tighter">04</span>
+        <div>
+          <span class="text-xs font-bold text-pastel-lavenderdark uppercase tracking-widest font-mono">SECLUDED VALLEY & CLIFF</span>
+          <h2 class="text-2xl sm:text-3xl font-serif font-bold text-pastel-textPrimary mt-0.5">
+            전북 순창 용궐산 하늘길 & 섬진강변
+          </h2>
+        </div>
+      </div>
+      <p class="text-xs sm:text-sm text-pastel-textMuted font-mono mb-5">
+        전라북도 순창군 동계면 어치리 · 섬진강의 고요함과 암릉의 비경
+      </p>
+
+      <div class="rounded-3xl overflow-hidden shadow-sm border border-pastel-border bg-stone-100 mb-6 relative">
+        <img 
+          src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=1200&q=80" 
+          alt="순창 용궐산과 섬진강 캠핑" 
+          class="w-full h-72 sm:h-96 object-cover hover:scale-102 transition-transform duration-700 ease-out"
+          onerror="this.src='https://placehold.co/1000x600/efeaf5/5e4e73?text=Sunchang+Valley'"
+        />
+        <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-sans text-pastel-textPrimary shadow-sm">
+          📸 거대한 용궐산 암벽을 올려다보며 마시는 저녁 맥주 한 잔의 낭만.
+        </div>
+      </div>
+
+      <div class="space-y-4 font-serif text-pastel-textPrimary leading-relaxed text-sm sm:text-base">
+        <p>
+          남도의 따스한 볕과 섬진강 상류의 순수한 정취를 간직한 순창은 혼자 훌쩍 떠나기 가장 편안한 소도시 중 하나입니다. 용궐산 자연휴양림과 강변 캠핑지는 깎아지른 바위산의 웅장한 능선과 잔잔한 강물이 어우러져 이국적인 압도감을 선사합니다. 밤에는 빛 공해가 거의 없어 맨눈으로도 선명한 별자리를 마주할 수 있습니다.
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 my-6 font-sans text-xs">
+          <div class="p-4 rounded-2xl bg-pastel-lavender/50 border border-pastel-lavenderdark/15">
+            <span class="font-bold text-pastel-lavenderdark block mb-1">🌌 솔캠 추천 포인트</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              밤하늘 천체 관측의 명당. 조용한 1인 캠퍼들이 주로 찾아 조용한 사색의 쉼이 보장됩니다.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-cream border border-pastel-border">
+            <span class="font-bold text-pastel-textPrimary block mb-1">🚗 1박 2일 동선 팁</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              1일 차: 순창 전통 고추장마을 산책 → 하늘길 트레킹 후 사이트 안착 → 2일 차: 강천산 맨발 숲길 걷기.
+            </p>
+          </div>
+          <div class="p-4 rounded-2xl bg-pastel-lavender/50 border border-pastel-lavenderdark/15">
+            <span class="font-bold text-pastel-lavenderdark block mb-1">⛺ 에디터의 장비 조언</span>
+            <p class="text-pastel-textSecondary leading-normal">
+              별을 오래 볼 수 있도록 목을 편안하게 받쳐주는 릴렉스 체어와 보온용 블랭킷을 준비하세요.
+            </p>
+          </div>
+        </div>
+
+        <blockquote class="border-l-2 border-pastel-lavenderdark pl-4 italic text-pastel-textSecondary my-4 text-xs sm:text-sm">
+          “별빛 아래에서 마시는 따뜻한 차 한 잔은, 바쁘게 살아오느라 놓쳤던 내면의 목소리를 다시 듣게 해 줍니다.”
+        </blockquote>
+      </div>
+    </article>
+
+    <!-- GQ EDITOR'S GEAR & CHECKLIST -->
+    <section class="pt-12 border-t border-pastel-border">
+      <div class="text-center max-w-xl mx-auto mb-8">
+        <span class="text-xs font-bold text-pastel-sagedark uppercase tracking-widest font-mono">GQ EDITOR'S GEAR LOCKER</span>
+        <h3 class="text-2xl font-serif font-bold text-pastel-textPrimary mt-1">1박 2일 나홀로 캠핑 필수 패킹 리스트</h3>
+        <p class="text-xs sm:text-sm text-pastel-textSecondary mt-2">
+          짐이 가벼울수록 마음은 자유로워집니다. 미니멀 솔로 캠핑에 꼭 필요한 품목을 체크해보세요.
+        </p>
+      </div>
+
+      <!-- Packing Progress Meter -->
+      <div class="p-5 rounded-2xl bg-white border border-pastel-border shadow-sm mb-6 max-w-2xl mx-auto">
+        <div class="flex items-center justify-between text-xs font-medium mb-2">
+          <span class="flex items-center gap-1.5 text-pastel-textPrimary font-semibold">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-pastel-sagedark"></i> 패킹 진행률
+          </span>
+          <span id="pack-percent" class="font-mono font-bold text-pastel-sagedark">0%</span>
+        </div>
+        <div class="w-full bg-stone-100 h-2.5 rounded-full overflow-hidden">
+          <div id="pack-bar" class="h-full bg-pastel-sagedark transition-all duration-300 rounded-full" style="width: 0%"></div>
+        </div>
+        <div class="flex justify-between items-center text-[11px] text-pastel-textMuted mt-2 font-mono">
+          <span id="pack-count-text">0 / 0 완료</span>
+          <button id="pack-reset-btn" class="hover:underline text-pastel-textSecondary">초기화</button>
+        </div>
+      </div>
+
+      <!-- Checklist Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto" id="gear-checklist-container">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+    <!-- SOLO GOURMET RECIPES -->
+    <section class="pt-12 border-t border-pastel-border">
+      <div class="text-center max-w-xl mx-auto mb-8">
+        <span class="text-xs font-bold text-pastel-blushdark uppercase tracking-widest font-mono">SOLO DINING ARCHIVE</span>
+        <h3 class="text-2xl font-serif font-bold text-pastel-textPrimary mt-1">원팬(One-Pan)으로 끝내는 감성 캠핑 미식</h3>
+        <p class="text-xs sm:text-sm text-pastel-textSecondary mt-2">
+          번거로운 설거지 없이 팬 하나로 완성하는 혼자만의 낭만적인 저녁 식탁.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Recipe 1 -->
+        <div class="p-5 rounded-2xl bg-white border border-pastel-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div class="w-full h-36 rounded-xl overflow-hidden mb-3 bg-stone-100">
+              <img 
+                src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=600&q=80" 
+                alt="미니 그리들 채끝 스테이크" 
+                class="w-full h-full object-cover"
+                onerror="this.src='https://placehold.co/400x300/faf7f2/47695c?text=Steak'"
+              />
+            </div>
+            <span class="text-[11px] font-semibold text-pastel-blushdark font-mono uppercase">MEAT & BUTTER</span>
+            <h4 class="font-serif font-bold text-base text-pastel-textPrimary mt-0.5">로즈마리 채끝 스테이크</h4>
+            <p class="text-xs text-pastel-textSecondary mt-1.5 leading-relaxed">
+              버터 2조각과 생로즈마리로 향을 입힌 1인용 소고기. 시즈닝 솔트 하나면 별도 양념이 필요 없습니다.
+            </p>
+          </div>
+          <button onclick="openRecipeModal('steak')" class="mt-4 text-xs font-bold text-pastel-sagedark hover:underline flex items-center gap-1">
+            레시피 읽기 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Recipe 2 -->
+        <div class="p-5 rounded-2xl bg-white border border-pastel-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div class="w-full h-36 rounded-xl overflow-hidden mb-3 bg-stone-100">
+              <img 
+                src="https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=600&q=80" 
+                alt="조개 칼국수 나베" 
+                class="w-full h-full object-cover"
+                onerror="this.src='https://placehold.co/400x300/e8f0f8/43688b?text=Nabe'"
+              />
+            </div>
+            <span class="text-[11px] font-semibold text-pastel-skydark font-mono uppercase">WARM BROTH</span>
+            <h4 class="font-serif font-bold text-base text-pastel-textPrimary mt-0.5">칼칼 바지락 어묵 냄비</h4>
+            <p class="text-xs text-pastel-textSecondary mt-1.5 leading-relaxed">
+              서늘한 밤공기 속에서 보글보글 끓여내는 따스한 국물. 청양고추 한 개로 완성하는 깊은 감칠맛.
+            </p>
+          </div>
+          <button onclick="openRecipeModal('nabe')" class="mt-4 text-xs font-bold text-pastel-sagedark hover:underline flex items-center gap-1">
+            레시피 읽기 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+
+        <!-- Recipe 3 -->
+        <div class="p-5 rounded-2xl bg-white border border-pastel-border shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+          <div>
+            <div class="w-full h-36 rounded-xl overflow-hidden mb-3 bg-stone-100">
+              <img 
+                src="https://images.unsplash.com/photo-1534432182912-63863115e106?auto=format&fit=crop&w=600&q=80" 
+                alt="마시멜로 스모어 디저트" 
+                class="w-full h-full object-cover"
+                onerror="this.src='https://placehold.co/400x300/efeaf5/5e4e73?text=Dessert'"
+              />
+            </div>
+            <span class="text-[11px] font-semibold text-pastel-lavenderdark font-mono uppercase">SWEET DESSERT</span>
+            <h4 class="font-serif font-bold text-base text-pastel-textPrimary mt-0.5">다크초코 비스킷 스모어</h4>
+            <p class="text-xs text-pastel-textSecondary mt-1.5 leading-relaxed">
+              화로대 숯불에 노릇하게 구운 마시멜로와 진한 다크초콜릿. 따뜻한 드립 커피와 찰떡궁합.
+            </p>
+          </div>
+          <button onclick="openRecipeModal('smores')" class="mt-4 text-xs font-bold text-pastel-sagedark hover:underline flex items-center gap-1">
+            레시피 읽기 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- READERS' COMMENTS / LETTERS -->
+    <section class="pt-12 border-t border-pastel-border">
+      <div class="text-center max-w-xl mx-auto mb-8">
+        <span class="text-xs font-bold text-pastel-sagedark uppercase tracking-widest font-mono">READERS' LETTERS</span>
+        <h3 class="text-2xl font-serif font-bold text-pastel-textPrimary mt-1">캠퍼들의 여행 한마디</h3>
+        <p class="text-xs sm:text-sm text-pastel-textSecondary mt-2">
+          혼자만의 여행에 대한 소회나 나만 알고 있는 국내의 한적한 1박 2일 스팟을 공유해 주세요.
+        </p>
+      </div>
+
+      <!-- Letter Input Form -->
+      <div class="max-w-2xl mx-auto bg-white p-6 rounded-3xl border border-pastel-border shadow-sm mb-6">
+        <form id="comment-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-pastel-textSecondary mb-1 font-mono">NAME / 닉네임</label>
+              <input 
+                type="text" 
+                id="comment-name" 
+                placeholder="예: 주말방랑자" 
+                maxlength="20"
+                class="w-full px-3.5 py-2 rounded-xl border border-pastel-border bg-stone-50/50 text-xs text-pastel-textPrimary focus:outline-none focus:ring-1 focus:ring-pastel-sagedark"
+                required
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-pastel-textSecondary mb-1 font-mono">DESTINATION / 추천지</label>
+              <input 
+                type="text" 
+                id="comment-place" 
+                placeholder="예: 영월 동강, 단양 소백산" 
+                maxlength="25"
+                class="w-full px-3.5 py-2 rounded-xl border border-pastel-border bg-stone-50/50 text-xs text-pastel-textPrimary focus:outline-none focus:ring-1 focus:ring-pastel-sagedark"
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-pastel-textSecondary mb-1 font-mono">MESSAGE / 메시지</label>
+            <textarea 
+              id="comment-msg" 
+              rows="3" 
+              placeholder="나만의 솔로 캠핑 팁이나 기사에 대한 감상을 남겨주세요." 
+              maxlength="250"
+              class="w-full px-3.5 py-2 rounded-xl border border-pastel-border bg-stone-50/50 text-xs text-pastel-textPrimary focus:outline-none focus:ring-1 focus:ring-pastel-sagedark resize-none"
+              required
+            ></textarea>
+          </div>
+          <div class="flex justify-end">
+            <button type="submit" class="px-5 py-2 rounded-full bg-pastel-sagedark hover:bg-pastel-sagedark/90 text-white text-xs font-medium transition-colors shadow-sm flex items-center gap-1.5">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> 코멘트 남기기
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Comments Stream -->
+      <div id="comments-container" class="max-w-2xl mx-auto space-y-3">
+        <!-- Rendered by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- GQ Editorial Style Footer -->
+  <footer class="border-t border-pastel-border bg-white mt-20 py-14">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-4">
+      <div class="font-display font-bold tracking-[0.3em] text-xl text-pastel-textPrimary">
+        GQ ESCAPE · CAMPING ARCHIVE
+      </div>
+      <p class="text-xs text-pastel-textMuted max-w-md mx-auto leading-relaxed">
+        자연을 존중하는 LNT(Leave No Trace) 정신을 지지합니다.<br>
+        머문 자리는 떠날 때 처음보다 더 깨끗하게 정돈합니다.
+      </p>
+      <div class="pt-4 text-[11px] text-pastel-textMuted border-t border-pastel-border/60 max-w-xs mx-auto font-mono">
+        © 2026 MINWOO ARCHIVE. CURATED WITH NATURE.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Ambient Bonfire Overlay Modal -->
+  <div id="bonfire-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex-col items-center justify-center p-4">
+    <button onclick="closeBonfireModal()" class="absolute top-6 right-6 p-2 rounded-full text-stone-400 hover:text-white bg-white/10 transition-colors">
+      <i data-lucide="x" class="w-5 h-5"></i>
+    </button>
+
+    <div class="max-w-md w-full text-center text-white space-y-6">
+      <div class="relative w-64 h-64 mx-auto flex items-center justify-center">
+        <canvas id="fire-canvas" class="w-full h-full"></canvas>
+        <span class="absolute text-5xl select-none animate-pulse">🔥</span>
+      </div>
+
+      <div>
+        <span class="text-xs font-mono tracking-widest text-pastel-blush uppercase">Tone.js Synthesizer</span>
+        <h3 class="text-2xl font-serif font-bold text-white mt-1">심야의 모닥불 사운드</h3>
+        <p class="text-xs text-stone-300 mt-2 leading-relaxed">
+          외장 음원 없이 실시간 알고리즘으로 합성된 자연의 타닥거리는 장작 소리입니다.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-center gap-3 pt-2">
+        <button id="bonfire-mute-toggle" class="px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 text-xs font-medium text-white transition-colors flex items-center gap-2">
+          <i data-lucide="volume-2" class="w-4 h-4" id="audio-icon"></i>
+          <span id="audio-text">소리 끄기</span>
+        </button>
+        <button onclick="closeBonfireModal()" class="px-5 py-2 rounded-full bg-pastel-blushdark hover:bg-pastel-blushdark/90 text-xs font-semibold text-white transition-colors">
+          창 닫기
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal for Recipes & Info -->
+  <div id="info-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 relative shadow-2xl border border-pastel-border max-h-[90vh] overflow-y-auto">
+      <button onclick="closeInfoModal()" class="absolute top-4 right-4 p-2 text-pastel-textMuted hover:text-pastel-textPrimary rounded-full hover:bg-stone-100">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <div id="info-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification (Non-blocking alert replacement) -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 bg-pastel-textPrimary text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 text-xs transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none">
+    <i data-lucide="info" class="w-4 h-4 text-pastel-sage"></i>
+    <span id="toast-text">메시지</span>
+  </div>
+
+  <script>
+    /* Gear Checklist Data */
+    const gearList = [
+      { id: 1, name: "경량 1~2인용 솔로 텐트", group: "Shelter", checked: true },
+      { id: 2, name: "3계절 다운 침낭 (-5°C)", group: "Shelter", checked: true },
+      { id: 3, name: "자충식 에어매트 & 경량 베개", group: "Shelter", checked: false },
+      { id: 4, name: "미니 콤팩트 가스 호스 버너", group: "Cooking", checked: true },
+      { id: 5, name: "무쇠 미니 그리들 (팬 겸용)", group: "Cooking", checked: false },
+      { id: 6, name: "티타늄 시에라컵 & 숟가락", group: "Cooking", checked: true },
+      { id: 7, name: "초경량 접이식 메쉬 화로대", group: "Lighting", checked: false },
+      { id: 8, name: "충전식 LED 캠핑 랜턴 2개", group: "Lighting", checked: true },
+      { id: 9, name: "보온 블랭킷 & 휴대용 보조배터리", group: "Lighting", checked: true }
+    ];
+
+    /* Reader Letters Data */
+    let comments = [
+      {
+        id: 1,
+        name: "솔캠러 한결",
+        place: "강원 영월 삿갓봉",
+        date: "2026. 10. 02",
+        msg: "영월 동강 가을 물안개는 진짜 인생 풍경입니다. 에디터 팁대로 파쇄석 사이트 잡고 조용히 책 읽다 왔어요."
+      },
+      {
+        id: 2,
+        name: "주말의 여행자",
+        place: "전북 순창 섬진강변",
+        date: "2026. 09. 29",
+        msg: "순창 용궐산 하늘길 걷고 저녁에 별 보며 멍때렸는데 복잡했던 머릿속이 싹 정돈되는 기분이었습니다. 강추!"
+      }
+    ];
+
+    /* Toast Helper */
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const text = document.getElementById('toast-text');
+      text.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2800);
+    }
+
+    /* Clipboard Copy Link */
+    function copyCurrentLink() {
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = window.location.href;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      showToast('기사 링크가 클립보드에 복사되었습니다.');
+    }
+
+    /* Render Gear Checklist */
+    function renderGear() {
+      const container = document.getElementById('gear-checklist-container');
+      const groups = ['Shelter', 'Cooking', 'Lighting'];
+      const groupLabels = {
+        'Shelter': '쉘터 & 침구',
+        'Cooking': '조리 & 키친',
+        'Lighting': '조명 & 불멍'
+      };
+
+      container.innerHTML = groups.map(grp => {
+        const items = gearList.filter(g => g.group === grp);
+        return `
+          <div class="p-4 rounded-2xl bg-white border border-pastel-border shadow-sm">
+            <h4 class="text-xs font-bold text-pastel-textPrimary font-mono uppercase pb-2 mb-2 border-b border-pastel-border flex items-center justify-between">
+              <span>${groupLabels[grp]}</span>
+              <span class="text-[10px] text-pastel-textMuted">${items.filter(i => i.checked).length}/${items.length}</span>
+            </h4>
+            <div class="space-y-2">
+              ${items.map(item => `
+                <label class="flex items-center gap-2.5 text-xs cursor-pointer select-none group/item">
+                  <input 
+                    type="checkbox" 
+                    ${item.checked ? 'checked' : ''} 
+                    onchange="toggleGear(${item.id})"
+                    class="w-3.5 h-3.5 rounded text-pastel-sagedark border-pastel-border focus:ring-0"
+                  />
+                  <span class="${item.checked ? 'line-through text-pastel-textMuted' : 'text-pastel-textPrimary'} transition-colors">
+                    ${item.name}
+                  </span>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update packing progress
+      const total = gearList.length;
+      const done = gearList.filter(g => g.checked).length;
+      const pct = Math.round((done / total) * 100);
+      document.getElementById('pack-percent').textContent = `${pct}%`;
+      document.getElementById('pack-bar').style.width = `${pct}%`;
+      document.getElementById('pack-count-text').textContent = `${done} / ${total} 완료`;
+    }
+
+    function toggleGear(id) {
+      const target = gearList.find(g => g.id === id);
+      if (target) {
+        target.checked = !target.checked;
+        renderGear();
+      }
+    }
+
+    document.getElementById('pack-reset-btn').addEventListener('click', () => {
+      gearList.forEach(g => g.checked = false);
+      renderGear();
+      showToast('체크리스트가 초기화되었습니다.');
+    });
+
+    /* Render Reader Comments */
+    function renderComments() {
+      const container = document.getElementById('comments-container');
+      if (comments.length === 0) {
+        container.innerHTML = `<p class="text-xs text-center text-pastel-textMuted py-4">남겨진 코멘트가 없습니다. 첫 코멘트를 작성해보세요.</p>`;
+        return;
+      }
+      container.innerHTML = comments.map(c => `
+        <div class="p-4 rounded-2xl bg-white border border-pastel-border shadow-sm text-xs space-y-1.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-pastel-textPrimary">${c.name}</span>
+              <span class="px-2 py-0.5 rounded-full bg-pastel-cream text-[10px] text-pastel-textSecondary border border-pastel-border">📍 ${c.place}</span>
+            </div>
+            <span class="text-[10px] font-mono text-pastel-textMuted">${c.date}</span>
+          </div>
+          <p class="text-pastel-textSecondary leading-relaxed pt-1 font-serif">${c.msg}</p>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('comment-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('comment-name').value.trim();
+      const place = document.getElementById('comment-place').value.trim();
+      const msg = document.getElementById('comment-msg').value.trim();
+      if (!name || !msg) return;
+
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}. ${String(now.getMonth()+1).padStart(2,'0')}. ${String(now.getDate()).padStart(2,'0')}`;
+      comments.unshift({ id: Date.now(), name, place, date: dateStr, msg });
+
+      document.getElementById('comment-name').value = '';
+      document.getElementById('comment-place').value = '';
+      document.getElementById('comment-msg').value = '';
+      renderComments();
+      showToast('코멘트가 성공적으로 등록되었습니다.');
+    });
+
+    /* Recipe Modal Data */
+    const recipeDetails = {
+      steak: {
+        title: "로즈마리 채끝 스테이크",
+        time: "15분 소요",
+        level: "★☆☆☆☆",
+        ingredients: "채끝 소고기 250g, 무염 버터 2조각, 로즈마리 2줄기, 통마늘 4쪽, 시즈닝 솔트, 올리브유",
+        steps: [
+          "고기는 굽기 20분 전 실온에 꺼내 핏물을 닦고 시즈닝 솔트와 올리브유로 밑간합니다.",
+          "미니 그리들을 강하게 달군 뒤 고기를 올리고 앞뒤를 각각 1분 30초씩 시어링합니다.",
+          "버터와 마늘, 로즈마리를 넣고 녹은 버터를 숟가락으로 고기 위에 끼얹어 풍미를 입힙니다.",
+          "호일에 감싸 3분간 레스팅 후 얇게 썰어 즐깁니다."
+        ]
+      },
+      nabe: {
+        title: "칼칼 바지락 어묵 냄비",
+        time: "15분 소요",
+        level: "★☆☆☆☆",
+        ingredients: "손질 바지락 1봉, 모둠 꼬치어묵, 청양고추 1개, 대파 반 뿌리, 멸치 육수팩",
+        steps: [
+          "코펠에 물과 육수팩을 넣고 5분간 끓여 맑은 육수를 만듭니다.",
+          "바지락과 어묵 꼬치를 넣고 바지락이 입을 벌릴 때까지 팔팔 끓입니다.",
+          "송송 썬 청양고추와 대파를 듬뿍 넣어 시원하고 칼칼하게 마무리합니다."
+        ]
+      },
+      smores: {
+        title: "다크초코 비스킷 스모어",
+        time: "5분 소요",
+        level: "☆☆☆☆☆",
+        ingredients: "통밀 크래커 4장, 구이용 대형 마시멜로 2개, 쌉싸름한 다크초콜릿 2조각",
+        steps: [
+          "꼬치에 마시멜로를 끼워 화로대 숯불 위에서 천천히 굴려 겉을 캐러멜색으로 굽습니다.",
+          "크래커 위에 다크초콜릿을 얹고, 갓 구운 뜨거운 마시멜로를 덮습니다.",
+          "다른 크래커로 샌드하여 살포시 누르면 초콜릿이 부드럽게 녹아듭니다."
+        ]
+      }
+    };
+
+    function openRecipeModal(key) {
+      const data = recipeDetails[key];
+      if (!data) return;
+      const content = document.getElementById('info-modal-content');
+      content.innerHTML = `
+        <div class="space-y-4 font-sans text-xs">
+          <div class="flex items-center justify-between text-pastel-textMuted border-b border-pastel-border pb-2 font-mono">
+            <span>⏱️ ${data.time}</span>
+            <span>난이도: ${data.level}</span>
+          </div>
+          <h3 class="text-xl font-serif font-bold text-pastel-textPrimary">${data.title}</h3>
+          
+          <div class="p-3.5 rounded-xl bg-pastel-cream border border-pastel-border text-pastel-textSecondary leading-normal">
+            <strong class="text-pastel-textPrimary block mb-1">재료:</strong>
+            ${data.ingredients}
+          </div>
+
+          <div class="space-y-2 pt-1">
+            <strong class="text-pastel-textPrimary block font-bold">만드는 법:</strong>
+            <ol class="list-decimal list-inside space-y-1.5 text-pastel-textSecondary leading-relaxed font-serif">
+              ${data.steps.map(s => `<li>${s}</li>`).join('')}
+            </ol>
+          </div>
+
+          <div class="pt-4 flex justify-end">
+            <button onclick="closeInfoModal()" class="px-5 py-2 rounded-full bg-pastel-sagedark text-white text-xs font-medium">닫기</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('info-modal').classList.remove('hidden');
+      document.getElementById('info-modal').classList.add('flex');
+    }
+
+    function closeInfoModal() {
+      document.getElementById('info-modal').classList.add('hidden');
+      document.getElementById('info-modal').classList.remove('flex');
+    }
+
+    // Modal dismiss on backdrop click
+    document.getElementById('info-modal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('info-modal')) closeInfoModal();
+    });
+
+    /* Tone.js Synthesized Bonfire Sound System */
+    let toneNoise = null;
+    let toneFilter = null;
+    let popLoop = null;
+    let isBonfireActive = false;
+    let isMuted = false;
+    let animationId = null;
+
+    async function initToneBonfire() {
+      try {
+        await Tone.start();
+        if (!toneNoise) {
+          toneFilter = new Tone.AutoFilter({
+            frequency: "4n",
+            baseFrequency: 180,
+            octaves: 3
+          }).toDestination().start();
+
+          toneNoise = new Tone.Noise("pink").connect(toneFilter);
+          toneNoise.volume.value = -24;
+
+          const snapSynth = new Tone.MembraneSynth({
+            pitchDecay: 0.02,
+            octaves: 1.5,
+            envelope: { attack: 0.001, decay: 0.04, sustain: 0, release: 0.02 }
+          }).toDestination();
+          snapSynth.volume.value = -14;
+
+          popLoop = new Tone.Loop((time) => {
+            if (Math.random() > 0.35) {
+              const notes = ["D1", "E1", "G1", "A1"];
+              snapSynth.triggerAttackRelease(notes[Math.floor(Math.random()*notes.length)], "32n", time);
+            }
+          }, "16n").start(0);
+        }
+        Tone.Transport.start();
+        toneNoise.start();
+      } catch (err) {
+        console.warn("Audio interaction needed:", err);
+      }
+    }
+
+    function stopToneBonfire() {
+      if (toneNoise) {
+        toneNoise.stop();
+        Tone.Transport.stop();
+      }
+    }
+
+    /* Ember Canvas Animation */
+    const canvas = document.getElementById('fire-canvas');
+    const ctx = canvas.getContext('2d');
+    let embers = [];
+
+    function setupCanvas() {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    }
+
+    class Ember {
+      constructor(w, h) { this.init(w, h); }
+      init(w, h) {
+        this.x = w / 2 + (Math.random() - 0.5) * 40;
+        this.y = h * 0.7;
+        this.vx = (Math.random() - 0.5) * 1.5;
+        this.vy = -(Math.random() * 2 + 1);
+        this.size = Math.random() * 3 + 1.5;
+        this.alpha = 1;
+        this.decay = Math.random() * 0.02 + 0.015;
+      }
+      update(w, h) {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= this.decay;
+        if (this.alpha <= 0) this.init(w, h);
+      }
+      draw(c) {
+        c.save();
+        c.beginPath();
+        c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        c.fillStyle = `rgba(251, 146, 60, ${this.alpha})`;
+        c.fill();
+        c.restore();
+      }
+    }
+
+    function startEmberAnimation() {
+      setupCanvas();
+      embers = Array.from({ length: 35 }, () => new Ember(canvas.width, canvas.height));
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        embers.forEach(e => {
+          e.update(canvas.width, canvas.height);
+          e.draw(ctx);
+        });
+        animationId = requestAnimationFrame(loop);
+      }
+      loop();
+    }
+
+    function openBonfireModal() {
+      document.getElementById('bonfire-modal').classList.remove('hidden');
+      document.getElementById('bonfire-modal').classList.add('flex');
+      document.getElementById('bonfire-nav-status').textContent = '불멍 재생중';
+      isBonfireActive = true;
+      startEmberAnimation();
+      initToneBonfire();
+    }
+
+    function closeBonfireModal() {
+      document.getElementById('bonfire-modal').classList.add('hidden');
+      document.getElementById('bonfire-modal').classList.remove('flex');
+      document.getElementById('bonfire-nav-status').textContent = '불멍 사운드';
+      isBonfireActive = false;
+      if (animationId) cancelAnimationFrame(animationId);
+      stopToneBonfire();
+    }
+
+    document.getElementById('bonfire-toggle').addEventListener('click', () => {
+      if (!isBonfireActive) openBonfireModal();
+      else closeBonfireModal();
+    });
+
+    document.getElementById('bonfire-mute-toggle').addEventListener('click', () => {
+      isMuted = !isMuted;
+      Tone.Destination.mute = isMuted;
+      document.getElementById('audio-text').textContent = isMuted ? '소리 켜기' : '소리 끄기';
+      const icon = document.getElementById('audio-icon');
+      icon.setAttribute('data-lucide', isMuted ? 'volume-x' : 'volume-2');
+      lucide.createIcons();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderGear();
+      renderComments();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
