@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KDS 규준 시스템비계 구조안전성 계산 시스템</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js & OrbitControls for 3D digital twin visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Pretendard Font -->
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            },
+            steel: '#475569',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Print Stylesheet for Engineering Report */
+    @media print {
+      body { background: white !important; color: black !important; }
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      .report-page { page-break-after: always; padding: 20mm; margin: 0; box-shadow: none !important; border: none !important; }
+    }
+    .print-only { display: none; }
+  </style>
+</head>
+
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none">
+
+  <!-- Top Global Header -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 px-6 py-3.5 flex flex-wrap items-center justify-between shadow-lg sticky top-0 z-50 no-print">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-md shadow-blue-500/30">
+        <i class="fa-solid fa-cubes-stacked text-lg"></i>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-lg font-bold tracking-tight text-white">시스템비계 구조안전성 계산 시스템</h1>
+          <span class="px-2 py-0.5 text-xs font-semibold bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">KDS 21 60 00 준용</span>
+        </div>
+        <p class="text-xs text-slate-400">가설구조물 설계기준 및 풍하중 자동검토 엔진 (KDS 41 10 15)</p>
+      </div>
+    </div>
+
+    <!-- Quick Presets & Export Actions -->
+    <div class="flex items-center gap-2.5 mt-2 sm:mt-0">
+      <div class="flex items-center bg-slate-800 rounded-lg p-1 border border-slate-700">
+        <span class="text-xs text-slate-400 px-2 font-medium">사전 설정:</span>
+        <select id="presetSelect" onchange="applyPreset(this.value)" class="bg-slate-900 text-xs text-slate-200 border-none rounded px-2.5 py-1.5 focus:ring-1 focus:ring-blue-500 outline-none">
+          <option value="apartment_standard">공동주택 외벽공사 (표준 31m, 수직보호망)</option>
+          <option value="low_rise_commercial">중저층 근생건물 (15m, 일반작업)</option>
+          <option value="high_wind_plant">해안/공단 강풍지역 (40m, 중작업)</option>
+          <option value="heavy_duty">고하중 설비/토목공사 (고강도 수직재)</option>
+        </select>
+      </div>
+
+      <button onclick="calculateAll(true)" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-rotate"></i>
+        <span>재계산</span>
+      </button>
+
+      <button onclick="printReport()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-print"></i>
+        <span>구조계산서 출력</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Grid Workspace -->
+  <main class="flex-1 max-w-[1920px] w-full mx-auto p-4 sm:p-5 grid grid-cols-1 xl:grid-cols-12 gap-5 no-print">
+
+    <!-- LEFT COLUMN: Parameter Input Panels (5 Cols) -->
+    <section class="xl:col-span-5 flex flex-col gap-4 overflow-y-auto max-h-[calc(100vh-85px)] pr-1">
+      
+      <!-- Input Panel 1: 비계 기본 제원 (Scaffold Geometry) -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-ruler-combined text-blue-600"></i>
+            1. 비계 기하 제원 (Geometry)
+          </h2>
+          <span class="text-xs text-slate-500">단위: m, 층</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">비계 전체높이 (H)</label>
+            <div class="relative">
+              <input type="number" id="scaffoldHeight" value="31.0" step="0.5" min="2" max="100" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">m</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">기둥 간격-장매 (L)</label>
+            <div class="relative">
+              <input type="number" id="postSpanL" value="1.8" step="0.1" min="0.6" max="3.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">m</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">기둥 간격-폭 (B)</label>
+            <div class="relative">
+              <input type="number" id="postWidthB" value="0.9" step="0.1" min="0.5" max="2.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">m</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">단 높이 / 층고 (h)</label>
+            <div class="relative">
+              <input type="number" id="tierHeight" value="1.9" step="0.05" min="1.0" max="2.5" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">m</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">전체 설치 층수</label>
+            <div class="relative">
+              <input type="number" id="totalTiers" value="16" step="1" min="1" max="60" class="w-full text-xs font-semibold bg-slate-100 border border-slate-300 rounded-lg p-2 pr-8 text-right text-slate-700" readonly>
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">단</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">동시 적재작업 층수</label>
+            <div class="relative">
+              <input type="number" id="activeWorkFloors" value="2" step="1" min="1" max="10" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-8 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">개층</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Panel 2: 부재 사양 & 강도 규격 (Materials & Structural Properties) -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-shapes text-indigo-600"></i>
+            2. 부재 강도 및 단면 특성 (Member Spec)
+          </h2>
+          <span class="text-xs text-slate-500">KS F 3122 / KDS 14 30</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">수직재 규격 (Vertical Post)</label>
+            <select id="verticalPipeSpec" onchange="updatePipeProperties(); calculateAll();" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 text-slate-700 focus:bg-white focus:border-blue-500">
+              <option value="STK500_48_6_2_4">고강도 STK500 (D=48.6mm, t=2.4mm, Fy=355)</option>
+              <option value="STK400_48_6_2_4">일반강관 STK400 (D=48.6mm, t=2.4mm, Fy=235)</option>
+              <option value="UL700_48_6_1_8" selected>초경량 고장력강 UL700 (D=48.6mm, t=1.8mm, Fy=500)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">수평재/장선 규격 (Horizontal)</label>
+            <select id="horizontalPipeSpec" onchange="calculateAll();" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 text-slate-700 focus:bg-white focus:border-blue-500">
+              <option value="STK500_42_7_2_2" selected>D=42.7mm, t=2.2mm (STK500)</option>
+              <option value="STK400_48_6_2_4">D=48.6mm, t=2.4mm (STK400)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Section Properties Readout -->
+        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 grid grid-cols-4 gap-2 text-center text-xs">
+          <div>
+            <div class="text-slate-400 font-medium text-[10px]">단면적 (A)</div>
+            <div id="dispArea" class="font-bold text-slate-700 mt-0.5">2.65 cm²</div>
+          </div>
+          <div>
+            <div class="text-slate-400 font-medium text-[10px]">단면이차모멘트 (I)</div>
+            <div id="dispInertia" class="font-bold text-slate-700 mt-0.5">7.15 cm⁴</div>
+          </div>
+          <div>
+            <div class="text-slate-400 font-medium text-[10px]">단면계수 (Z)</div>
+            <div id="dispZ" class="font-bold text-slate-700 mt-0.5">2.94 cm³</div>
+          </div>
+          <div>
+            <div class="text-slate-400 font-medium text-[10px]">회전반경 (r)</div>
+            <div id="dispRadius" class="font-bold text-slate-700 mt-0.5">1.64 cm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Panel 3: 작용 하중 및 풍하중 기준 (Loads & Wind Pressure) -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-wind text-sky-600"></i>
+            3. 작용 하중 및 설계풍속 (Design Loads)
+          </h2>
+          <span class="text-xs text-slate-500">KDS 41 10 15</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">작업 적재하중 구분</label>
+            <select id="workLiveLoad" onchange="calculateAll()" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 text-slate-700 focus:bg-white focus:border-blue-500">
+              <option value="1.25">경작업 (1.25 kN/m²)</option>
+              <option value="2.50" selected>일반작업 (2.50 kN/m²)</option>
+              <option value="3.50">중작업/조적 (3.50 kN/m²)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">기본풍속 (V₀)</label>
+            <div class="relative">
+              <input type="number" id="baseWindSpeed" value="30" step="2" min="20" max="50" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-11 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2 top-2 text-xs text-slate-400">m/s</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">지표면 조도구분</label>
+            <select id="terrainCategory" onchange="calculateAll()" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 text-slate-700 focus:bg-white focus:border-blue-500">
+              <option value="A">조도 A (대도시 중심)</option>
+              <option value="B" selected>조도 B (도시/주택지)</option>
+              <option value="C">조도 C (개활지/평야)</option>
+              <option value="D">조도 D (해안가/도서)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">수직보호망 충실율 (φ)</label>
+            <div class="relative">
+              <input type="number" id="solidityRatio" value="0.75" step="0.05" min="0.1" max="1.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">비</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">가스트 영향계수 (G)</label>
+            <input type="number" id="gustFactor" value="1.95" step="0.05" min="1.0" max="3.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">풍력계수 (Cf)</label>
+            <input type="number" id="windForceCoeff" value="1.3" step="0.05" min="0.8" max="2.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+          </div>
+        </div>
+
+        <div class="p-2.5 bg-blue-50/70 border border-blue-200 rounded-lg flex items-center justify-between text-xs text-blue-900">
+          <span class="font-medium"><i class="fa-solid fa-gauge-high mr-1.5 text-blue-600"></i>최상단 설계풍압 (P = qz × G × Cf × φ):</span>
+          <span id="calculatedWindPressure" class="font-bold text-blue-700 text-sm">0.782 kN/m²</span>
+        </div>
+      </div>
+
+      <!-- Input Panel 4: 벽이음 및 기초 지내력 조건 (Wall Ties & Base Jack) -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+          <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-anchor text-amber-600"></i>
+            4. 벽이음 철물 및 지반 조건 (Wall Ties & Foundation)
+          </h2>
+          <span class="text-xs text-slate-500">기준: 수직≤5m, 수평≤5m</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">벽이음 수직간격</label>
+            <div class="relative">
+              <input type="number" id="tieSpacingV" value="3.8" step="0.1" min="1.0" max="6.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">m</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">벽이음 수평간격</label>
+            <div class="relative">
+              <input type="number" id="tieSpacingH" value="3.6" step="0.1" min="1.0" max="6.0" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-7 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2.5 top-2 text-xs text-slate-400">m</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">벽이음 허용인장력</label>
+            <div class="relative">
+              <input type="number" id="tieCapacity" value="9.80" step="0.5" min="5" max="30" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-8 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2 top-2 text-xs text-slate-400">kN</span>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">지반 허용지지력</label>
+            <div class="relative">
+              <input type="number" id="soilBearingCapacity" value="100.0" step="10" min="20" max="500" class="w-full text-xs font-semibold bg-slate-50 border border-slate-300 rounded-lg p-2 pr-12 text-right focus:bg-white focus:border-blue-500 transition-colors" oninput="calculateAll()">
+              <span class="absolute right-2 top-2 text-xs text-slate-400">kN/m²</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: 3D Visualization & Calculation Summary Tabs (7 Cols) -->
+    <section class="xl:col-span-7 flex flex-col gap-4 overflow-hidden">
+      
+      <!-- Top Status Banner: Overall Safety Pass/Fail Matrix -->
+      <div id="overallStatusBanner" class="rounded-xl border p-4 bg-emerald-50 border-emerald-300 text-emerald-950 flex flex-wrap items-center justify-between shadow-sm transition-all">
+        <div class="flex items-center space-x-3.5">
+          <div id="overallStatusIcon" class="w-11 h-11 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-xl shadow-md">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="overallStatusTitle" class="text-base font-extrabold tracking-tight">구조안전성 종합 판정 : 만족 (SAFE)</span>
+              <span id="maxStressBadge" class="text-xs bg-emerald-200 text-emerald-800 font-bold px-2 py-0.5 rounded-full">최대검토비 68.4%</span>
+            </div>
+            <p id="overallStatusSub" class="text-xs text-emerald-700 mt-0.5">수직재 좌굴, 수평재 휨·처짐, 벽이음 인장, 지반 지내력 전 항목이 허용기준치 이내입니다.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 mt-2 sm:mt-0 font-mono text-xs">
+          <div class="text-center">
+            <span class="text-[10px] text-slate-500 block uppercase font-sans">수직재 응력</span>
+            <span id="ratioPostMini" class="font-bold text-slate-800">68.4%</span>
+          </div>
+          <div class="h-6 w-px bg-slate-300"></div>
+          <div class="text-center">
+            <span class="text-[10px] text-slate-500 block uppercase font-sans">수평재 휨</span>
+            <span id="ratioBeamMini" class="font-bold text-slate-800">54.1%</span>
+          </div>
+          <div class="h-6 w-px bg-slate-300"></div>
+          <div class="text-center">
+            <span class="text-[10px] text-slate-500 block uppercase font-sans">벽이음 내력</span>
+            <span id="ratioTieMini" class="font-bold text-slate-800">42.8%</span>
+          </div>
+          <div class="h-6 w-px bg-slate-300"></div>
+          <div class="text-center">
+            <span class="text-[10px] text-slate-500 block uppercase font-sans">지반 지내력</span>
+            <span id="ratioSoilMini" class="font-bold text-slate-800">31.2%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Main Display Tabs -->
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex-1 flex flex-col overflow-hidden">
+        <!-- Tab Bar -->
+        <div class="flex items-center border-b border-slate-200 bg-slate-50 px-4 pt-2 gap-2 text-xs font-semibold">
+          <button onclick="switchTab('tab-3d')" id="btn-tab-3d" class="tab-btn px-4 py-2.5 rounded-t-lg bg-white border-t-2 border-blue-600 text-blue-700 shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-cube"></i>
+            <span>3D 디지털 트윈 모델</span>
+          </button>
+          <button onclick="switchTab('tab-detail')" id="btn-tab-detail" class="tab-btn px-4 py-2.5 rounded-t-lg text-slate-600 hover:text-slate-900 border-t-2 border-transparent flex items-center gap-2">
+            <i class="fa-solid fa-calculator"></i>
+            <span>구조계산 세부 검토서</span>
+          </button>
+          <button onclick="switchTab('tab-wind')" id="btn-tab-wind" class="tab-btn px-4 py-2.5 rounded-t-lg text-slate-600 hover:text-slate-900 border-t-2 border-transparent flex items-center gap-2">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>풍하중 산정식 (KDS 기준)</span>
+          </button>
+        </div>
+
+        <!-- TAB CONTENT 1: 3D Visualization Engine -->
+        <div id="tab-3d" class="tab-pane flex-1 relative min-h-[480px] bg-slate-900 overflow-hidden">
+          <div id="threeCanvasContainer" class="w-full h-full absolute inset-0 cursor-grab active:cursor-grabbing"></div>
+
+          <!-- 3D Overlay Badges & Controls -->
+          <div class="absolute top-3 left-3 bg-slate-900/85 backdrop-blur-md border border-slate-700/70 rounded-lg p-2.5 text-white text-xs pointer-events-auto shadow-lg space-y-1">
+            <div class="font-bold flex items-center gap-1.5 text-blue-400">
+              <i class="fa-solid fa-layer-group"></i>
+              <span>3D 시스템비계 실시간 시뮬레이션</span>
+            </div>
+            <div class="text-[11px] text-slate-300">
+              마우스 좌클릭: 회전 | 우클릭: 이동 | 휠: 줌 인/아웃
+            </div>
+            <div class="flex items-center gap-3 pt-1 border-t border-slate-700 text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block"></span>수직재</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>수평재/장선</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>작업발판</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-red-400 inline-block"></span>벽이음재</span>
+            </div>
+          </div>
+
+          <div class="absolute bottom-3 right-3 flex items-center gap-2 bg-slate-900/80 backdrop-blur-sm p-1.5 rounded-lg border border-slate-700 text-xs">
+            <button onclick="reset3DCamera()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-600 flex items-center gap-1">
+              <i class="fa-solid fa-arrows-to-dot"></i> 시점 초기화
+            </button>
+            <label class="flex items-center gap-1 text-slate-300 px-1 cursor-pointer">
+              <input type="checkbox" id="toggleNet3D" checked onchange="toggleSafetyNet(this.checked)" class="rounded text-blue-600 focus:ring-0">
+              <span>수직보호망 표시</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- TAB CONTENT 2: Detailed Structural Verification Report -->
+        <div id="tab-detail" class="tab-pane hidden flex-1 p-5 overflow-y-auto max-h-[580px] bg-slate-50 text-slate-800 space-y-5">
+          
+          <!-- Summary Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
+            <!-- Card 1: 수직재 압축/좌굴 검토 -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <span class="font-bold text-xs text-blue-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-circle-nodes text-blue-600"></i> 수직재 축방향 좌굴안전성
+                </span>
+                <span id="postBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SAFE (68.4%)</span>
+              </div>
+              <table class="w-full text-xs">
+                <tbody>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">최대 기둥 설계축력 (Nu)</td><td id="calcNu" class="py-1 font-semibold text-right text-slate-800">18.42 kN</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">유효세장비 (λ = K·h / r)</td><td id="calcLambda" class="py-1 font-semibold text-right text-slate-800">115.8 (기준: ≤ 200)</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">허용압축응력 (fca)</td><td id="calcFca" class="py-1 font-semibold text-right text-slate-800">101.6 MPa</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">발생압축응력 (fc)</td><td id="calcFc" class="py-1 font-semibold text-right text-slate-800">69.5 MPa</td></tr>
+                  <tr><td class="pt-1.5 font-bold text-slate-700">검토비 (fc / fca)</td><td id="calcRatioPost" class="pt-1.5 font-bold text-right text-emerald-700">0.684 ≤ 1.00 (OK)</td></tr>
+                </tbody>
+              </table>
+              <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+                <div id="barPost" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 68.4%"></div>
+              </div>
+            </div>
+
+            <!-- Card 2: 수평재/장선 휨모멘트 및 처짐 검토 -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <span class="font-bold text-xs text-indigo-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-left-right text-indigo-600"></i> 수평재(장선) 휨 및 처짐
+                </span>
+                <span id="beamBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SAFE (54.1%)</span>
+              </div>
+              <table class="w-full text-xs">
+                <tbody>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">설계 등분포하중 (w)</td><td id="calcBeamW" class="py-1 font-semibold text-right text-slate-800">2.48 kN/m</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">최대 휨모멘트 (M = wL²/8)</td><td id="calcBeamM" class="py-1 font-semibold text-right text-slate-800">1.004 kN·m</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">발생 휨응력 (fb = M/Z)</td><td id="calcBeamFb" class="py-1 font-semibold text-right text-slate-800">118.2 MPa</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">최대 처짐 (δ max)</td><td id="calcBeamDefl" class="py-1 font-semibold text-right text-slate-800">2.41 mm (허용: 6.0 mm)</td></tr>
+                  <tr><td class="pt-1.5 font-bold text-slate-700">휨 검토비 (fb / fba)</td><td id="calcRatioBeam" class="pt-1.5 font-bold text-right text-emerald-700">0.541 ≤ 1.00 (OK)</td></tr>
+                </tbody>
+              </table>
+              <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+                <div id="barBeam" class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: 54.1%"></div>
+              </div>
+            </div>
+
+            <!-- Card 3: 벽이음 철물 내력 검토 -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <span class="font-bold text-xs text-amber-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-anchor text-amber-600"></i> 벽이음재 (Wall Tie) 인장/압축
+                </span>
+                <span id="tieBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SAFE (42.8%)</span>
+              </div>
+              <table class="w-full text-xs">
+                <tbody>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">벽이음 부담면적 (Atie = V·H)</td><td id="calcTieArea" class="py-1 font-semibold text-right text-slate-800">13.68 m²</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">작용 풍하중 (Rw = Atie × P)</td><td id="calcTieLoad" class="py-1 font-semibold text-right text-slate-800">4.19 kN</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">벽이음 허용내력 (Ra)</td><td id="calcTieCap" class="py-1 font-semibold text-right text-slate-800">9.80 kN</td></tr>
+                  <tr><td class="pt-1.5 font-bold text-slate-700">내력 검토비 (Rw / Ra)</td><td id="calcRatioTie" class="pt-1.5 font-bold text-right text-emerald-700">0.428 ≤ 1.00 (OK)</td></tr>
+                </tbody>
+              </table>
+              <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+                <div id="barTie" class="bg-amber-500 h-2 rounded-full transition-all duration-500" style="width: 42.8%"></div>
+              </div>
+            </div>
+
+            <!-- Card 4: 지반 지내력 및 받침철물 검토 -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <span class="font-bold text-xs text-rose-900 flex items-center gap-1.5">
+                  <i class="fa-solid fa-gem text-rose-600"></i> 받침철물 & 지반 지내력
+                </span>
+                <span id="soilBadge" class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">SAFE (31.2%)</span>
+              </div>
+              <table class="w-full text-xs">
+                <tbody>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">기둥 최하단 전달하중 (Pbase)</td><td id="calcPbase" class="py-1 font-semibold text-right text-slate-800">18.42 kN</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">받침목/깔판 규격 (단면적)</td><td class="py-1 font-semibold text-right text-slate-800">200×300mm (0.060 m²)</td></tr>
+                  <tr class="border-b border-slate-100"><td class="py-1 text-slate-500">지반 접지압 (q = Pbase / A)</td><td id="calcSoilPressure" class="py-1 font-semibold text-right text-slate-800">307.0 kN/m² (수정)</td></tr>
+                  <tr><td class="pt-1.5 font-bold text-slate-700">지내력 검토비 (q / qa)</td><td id="calcRatioSoil" class="pt-1.5 font-bold text-right text-emerald-700">0.312 ≤ 1.00 (OK)</td></tr>
+                </tbody>
+              </table>
+              <div class="w-full bg-slate-100 rounded-full h-2 mt-2.5 overflow-hidden">
+                <div id="barSoil" class="bg-rose-500 h-2 rounded-full transition-all duration-500" style="width: 31.2%"></div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Mathematical Formulation Guide -->
+          <div class="bg-white p-4 rounded-xl border border-slate-200">
+            <h3 class="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wider flex items-center gap-1">
+              <i class="fa-solid fa-book-bookmark text-slate-400"></i> KDS 21 60 00 설계 검토 산식 요약
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-[11px] font-mono bg-slate-50 p-3 rounded-lg text-slate-700 border border-slate-200">
+              <div>
+                <strong>[수직재 허용압축응력 (fca)]</strong><br>
+                • λ ≤ Λ 일 때: fca = [1 - 0.4(λ/Λ)²] × (Fy / ν)<br>
+                • λ > Λ 일 때: fca = 0.6 × Fy / [ (λ/Λ)² × ν ]<br>
+                (단, 한계세장비 Λ = √(π²E / 0.6Fy), 안전율 ν = 1.5)
+              </div>
+              <div>
+                <strong>[수평재 휨응력 및 처짐 (Bending & Deflection)]</strong><br>
+                • M = w · L² / 8, &nbsp; fb = M / Z ≤ fba (0.6Fy)<br>
+                • δmax = (5 · w · L⁴) / (384 · E · I) ≤ L / 300<br>
+                (E = 205,000 MPa, 강재 탄성계수)
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TAB CONTENT 3: Wind Pressure Formulas Tab -->
+        <div id="tab-wind" class="tab-pane hidden flex-1 p-5 overflow-y-auto max-h-[580px] bg-white text-slate-800 space-y-4">
+          <div class="border-b border-slate-200 pb-3">
+            <h3 class="text-base font-bold text-slate-800">건축구조기준(KDS 41 10 15) 비계 풍하중 상세 해석</h3>
+            <p class="text-xs text-slate-500">가설구조물 외벽 수직보호망 설치 상태의 설계속도압 및 단위면적당 설계풍압</p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-xs font-bold text-slate-500 block mb-1">1. 설계속도압 (qz)</span>
+              <div class="text-sm font-mono font-bold text-slate-800 mb-1">qz = 0.613 × Vz² (N/m²)</div>
+              <div id="windQzDetail" class="text-xs text-slate-600">Vz = 32.4 m/s (고도보정반영)<br>qz = 0.643 kN/m²</div>
+            </div>
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-xs font-bold text-slate-500 block mb-1">2. 높이방향 풍속고도분포 (Kzr)</span>
+              <div class="text-sm font-mono font-bold text-slate-800 mb-1">Kzr = b · (Z / Zg)^α</div>
+              <div id="windKzrDetail" class="text-xs text-slate-600">지표면 조도 B 기준 (α=0.22, Zg=350m)<br>Kzr = 1.08 (H=31.0m 위치)</div>
+            </div>
+            <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200">
+              <span class="text-xs font-bold text-slate-500 block mb-1">3. 설계풍압 (P)</span>
+              <div class="text-sm font-mono font-bold text-slate-800 mb-1">P = qz × G × Cf × φ</div>
+              <div id="windPDetail" class="text-xs text-blue-700 font-bold">P = 0.782 kN/m²<br>(수직보호망 충실율 φ 반영)</div>
+            </div>
+          </div>
+
+          <!-- Wind Velocity Profile Chart (CSS Bar Chart Representation) -->
+          <div class="mt-4 border border-slate-200 rounded-xl p-4 bg-slate-50">
+            <h4 class="text-xs font-bold text-slate-700 mb-3 flex items-center justify-between">
+              <span>비계 높이별 풍압 프로파일 (Height vs Design Wind Pressure)</span>
+              <span class="text-[11px] font-normal text-slate-500">상부로 갈수록 풍압 증가</span>
+            </h4>
+            <div id="windProfileBars" class="space-y-2">
+              <!-- Dynamically populated bars -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Formal Printable Structural Engineering Report Template -->
+  <div id="printableReport" class="print-only bg-white text-black p-8 font-sans">
+    <div class="border-b-2 border-black pb-4 mb-6 flex justify-between items-end">
+      <div>
+        <h1 class="text-2xl font-black">시스템비계 구조계산서 (STRUCTURAL CALCULATION)</h1>
+        <p class="text-sm text-gray-600 mt-1">기준: KDS 21 60 00 (비계 및 안전시설물 설계기준) & KDS 41 10 15 (풍하중)</p>
+      </div>
+      <div class="text-right text-xs">
+        <div>작성일자: <span id="rptDate">2026. 10. 02</span></div>
+        <div>프로젝트: 가설 시스템비계 표준 구조검토</div>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <h2 class="text-sm font-bold bg-gray-200 px-2 py-1 mb-2">1. 설계 개요 및 기본 제원</h2>
+    <table class="w-full text-xs border border-gray-300 mb-4">
+      <tr class="border-b"><td class="p-1.5 bg-gray-100 font-semibold w-1/4">비계 전고 (H)</td><td id="rptH" class="p-1.5 w-1/4">-</td><td class="p-1.5 bg-gray-100 font-semibold w-1/4">기둥 간격 (L × B)</td><td id="rptSpan" class="p-1.5 w-1/4">-</td></tr>
+      <tr class="border-b"><td class="p-1.5 bg-gray-100 font-semibold">단 높이 (h)</td><td id="rptStory" class="p-1.5">-</td><td class="p-1.5 bg-gray-100 font-semibold">설치 층수 / 작업층</td><td id="rptTiers" class="p-1.5">-</td></tr>
+      <tr class="border-b"><td class="p-1.5 bg-gray-100 font-semibold">수직재 규격</td><td id="rptPostSpec" class="p-1.5">-</td><td class="p-1.5 bg-gray-100 font-semibold">수평재 규격</td><td id="rptBeamSpec" class="p-1.5">-</td></tr>
+      <tr><td class="p-1.5 bg-gray-100 font-semibold">기본풍속 (V0)</td><td id="rptWindV" class="p-1.5">-</td><td class="p-1.5 bg-gray-100 font-semibold">작업 적재하중</td><td id="rptLiveLoad" class="p-1.5">-</td></tr>
+    </table>
+
+    <!-- Section 2 -->
+    <h2 class="text-sm font-bold bg-gray-200 px-2 py-1 mb-2">2. 구조안전성 계산 및 검토 결과 종합 판정표</h2>
+    <table class="w-full text-xs border border-gray-400 mb-6 text-center">
+      <thead class="bg-gray-100 font-semibold border-b">
+        <tr>
+          <th class="p-2 border-r">검토 항목</th>
+          <th class="p-2 border-r">설계 작용값</th>
+          <th class="p-2 border-r">허용 기준치</th>
+          <th class="p-2 border-r">검토비 (Ratio)</th>
+          <th class="p-2">판정</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="border-b">
+          <td class="p-2 border-r font-medium text-left">수직재(기둥) 축방향 압축좌굴응력</td>
+          <td id="rptR1_val" class="p-2 border-r">-</td>
+          <td id="rptR1_all" class="p-2 border-r">-</td>
+          <td id="rptR1_rat" class="p-2 border-r font-mono font-bold">-</td>
+          <td id="rptR1_jud" class="p-2 font-bold">-</td>
+        </tr>
+        <tr class="border-b">
+          <td class="p-2 border-r font-medium text-left">수평재(장선) 휨응력 (Bending Stress)</td>
+          <td id="rptR2_val" class="p-2 border-r">-</td>
+          <td id="rptR2_all" class="p-2 border-r">-</td>
+          <td id="rptR2_rat" class="p-2 border-r font-mono font-bold">-</td>
+          <td id="rptR2_jud" class="p-2 font-bold">-</td>
+        </tr>
+        <tr class="border-b">
+          <td class="p-2 border-r font-medium text-left">수평재 처짐 (Deflection Check)</td>
+          <td id="rptR3_val" class="p-2 border-r">-</td>
+          <td id="rptR3_all" class="p-2 border-r">-</td>
+          <td id="rptR3_rat" class="p-2 border-r font-mono font-bold">-</td>
+          <td id="rptR3_jud" class="p-2 font-bold">-</td>
+        </tr>
+        <tr class="border-b">
+          <td class="p-2 border-r font-medium text-left">벽이음재 인장/압축력 (Wall Tie Load)</td>
+          <td id="rptR4_val" class="p-2 border-r">-</td>
+          <td id="rptR4_all" class="p-2 border-r">-</td>
+          <td id="rptR4_rat" class="p-2 border-r font-mono font-bold">-</td>
+          <td id="rptR4_jud" class="p-2 font-bold">-</td>
+        </tr>
+        <tr>
+          <td class="p-2 border-r font-medium text-left">기초 지반 접지압 (Soil Bearing)</td>
+          <td id="rptR5_val" class="p-2 border-r">-</td>
+          <td id="rptR5_all" class="p-2 border-r">-</td>
+          <td id="rptR5_rat" class="p-2 border-r font-mono font-bold">-</td>
+          <td id="rptR5_jud" class="p-2 font-bold">-</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="p-3 border-2 border-black text-center font-bold text-sm bg-gray-50">
+      종합 판정: 상기 시스템비계 가설구조물은 KDS 21 60 00 및 KDS 41 10 15 기준에 의거하여 전 항목 안전율을 만족함.
+    </div>
+  </div>
+
+  <script>
+    /* STRUCTURAL CALCULATION ENGINE & DATA REPOSITORY */
+
+    // Pipe Material Database according to Korean Standards
+    const PIPE_SPECS = {
+      'STK500_48_6_2_4': {
+        name: 'STK500 Ø48.6×2.4t',
+        D: 48.6,
+        t: 2.4,
+        A: 3.483, // cm2
+        I: 9.324, // cm4
+        Z: 3.837, // cm3
+        r: 1.636, // cm
+        Fy: 355.0, // N/mm2 (MPa)
+        E: 205000, // N/mm2
+        selfWeightPerM: 2.73 // kg/m
+      },
+      'STK400_48_6_2_4': {
+        name: 'STK400 Ø48.6×2.4t',
+        D: 48.6,
+        t: 2.4,
+        A: 3.483,
+        I: 9.324,
+        Z: 3.837,
+        r: 1.636,
+        Fy: 235.0,
+        E: 205000,
+        selfWeightPerM: 2.73
+      },
+      'UL700_48_6_1_8': {
+        name: 'UL700 Ø48.6×1.8t',
+        D: 48.6,
+        t: 1.8,
+        A: 2.646,
+        I: 7.279,
+        Z: 2.995,
+        r: 1.658,
+        Fy: 500.0,
+        E: 205000,
+        selfWeightPerM: 2.08
+      },
+      'STK500_42_7_2_2': {
+        name: 'STK500 Ø42.7×2.2t',
+        D: 42.7,
+        t: 2.2,
+        A: 2.800,
+        I: 5.642,
+        Z: 2.643,
+        r: 1.419,
+        Fy: 355.0,
+        E: 205000,
+        selfWeightPerM: 2.20
+      }
+    };
+
+    // State object
+    let calcResults = {};
+
+    function updatePipeProperties() {
+      const specKey = document.getElementById('verticalPipeSpec').value;
+      const spec = PIPE_SPECS[specKey];
+      if (!spec) return;
+
+      document.getElementById('dispArea').innerText = spec.A.toFixed(2) + ' cm²';
+      document.getElementById('dispInertia').innerText = spec.I.toFixed(2) + ' cm⁴';
+      document.getElementById('dispZ').innerText = spec.Z.toFixed(2) + ' cm³';
+      document.getElementById('dispRadius').innerText = spec.r.toFixed(2) + ' cm';
+    }
+
+    function applyPreset(presetType) {
+      if (presetType === 'apartment_standard') {
+        document.getElementById('scaffoldHeight').value = 31.0;
+        document.getElementById('postSpanL').value = 1.8;
+        document.getElementById('postWidthB').value = 0.9;
+        document.getElementById('tierHeight').value = 1.9;
+        document.getElementById('activeWorkFloors').value = 2;
+        document.getElementById('verticalPipeSpec').value = 'UL700_48_6_1_8';
+        document.getElementById('workLiveLoad').value = '2.50';
+        document.getElementById('baseWindSpeed').value = 30;
+        document.getElementById('terrainCategory').value = 'B';
+        document.getElementById('solidityRatio').value = 0.75;
+        document.getElementById('tieSpacingV').value = 3.8;
+        document.getElementById('tieSpacingH').value = 3.6;
+        document.getElementById('soilBearingCapacity').value = 100.0;
+      } else if (presetType === 'low_rise_commercial') {
+        document.getElementById('scaffoldHeight').value = 15.0;
+        document.getElementById('postSpanL').value = 1.8;
+        document.getElementById('postWidthB').value = 0.9;
+        document.getElementById('tierHeight').value = 1.9;
+        document.getElementById('activeWorkFloors').value = 1;
+        document.getElementById('verticalPipeSpec').value = 'STK400_48_6_2_4';
+        document.getElementById('workLiveLoad').value = '1.25';
+        document.getElementById('baseWindSpeed').value = 26;
+        document.getElementById('terrainCategory').value = 'B';
+        document.getElementById('solidityRatio').value = 0.65;
+        document.getElementById('tieSpacingV').value = 3.8;
+        document.getElementById('tieSpacingH').value = 3.6;
+        document.getElementById('soilBearingCapacity').value = 80.0;
+      } else if (presetType === 'high_wind_plant') {
+        document.getElementById('scaffoldHeight').value = 40.0;
+        document.getElementById('postSpanL').value = 1.5;
+        document.getElementById('postWidthB').value = 0.9;
+        document.getElementById('tierHeight').value = 1.8;
+        document.getElementById('activeWorkFloors').value = 2;
+        document.getElementById('verticalPipeSpec').value = 'STK500_48_6_2_4';
+        document.getElementById('workLiveLoad').value = '3.50';
+        document.getElementById('baseWindSpeed').value = 38;
+        document.getElementById('terrainCategory').value = 'D';
+        document.getElementById('solidityRatio').value = 0.85;
+        document.getElementById('tieSpacingV').value = 3.6;
+        document.getElementById('tieSpacingH').value = 3.0;
+        document.getElementById('soilBearingCapacity').value = 150.0;
+      } else if (presetType === 'heavy_duty') {
+        document.getElementById('scaffoldHeight').value = 24.0;
+        document.getElementById('postSpanL').value = 1.2;
+        document.getElementById('postWidthB').value = 1.2;
+        document.getElementById('tierHeight').value = 1.8;
+        document.getElementById('activeWorkFloors').value = 3;
+        document.getElementById('verticalPipeSpec').value = 'STK500_48_6_2_4';
+        document.getElementById('workLiveLoad').value = '3.50';
+        document.getElementById('baseWindSpeed').value = 32;
+        document.getElementById('terrainCategory').value = 'C';
+        document.getElementById('solidityRatio').value = 0.70;
+        document.getElementById('tieSpacingV').value = 3.6;
+        document.getElementById('tieSpacingH').value = 2.4;
+        document.getElementById('soilBearingCapacity').value = 120.0;
+      }
+      updatePipeProperties();
+      calculateAll(true);
+    }
+
+    function calculateAll(sync3D = true) {
+      // 1. Gather Geometry Inputs
+      const H = parseFloat(document.getElementById('scaffoldHeight').value) || 31.0;
+      const L = parseFloat(document.getElementById('postSpanL').value) || 1.8;
+      const B = parseFloat(document.getElementById('postWidthB').value) || 0.9;
+      const h = parseFloat(document.getElementById('tierHeight').value) || 1.9;
+      const activeWorkFloors = parseInt(document.getElementById('activeWorkFloors').value) || 2;
+
+      const totalTiers = Math.max(1, Math.ceil(H / h));
+      document.getElementById('totalTiers').value = totalTiers;
+
+      // 2. Member Material Properties
+      const vSpecKey = document.getElementById('verticalPipeSpec').value;
+      const vPipe = PIPE_SPECS[vSpecKey] || PIPE_SPECS['UL700_48_6_1_8'];
+
+      const hSpecKey = document.getElementById('horizontalPipeSpec').value;
+      const hPipe = PIPE_SPECS[hSpecKey] || PIPE_SPECS['STK500_42_7_2_2'];
+
+      // 3. Environmental & Load Inputs
+      const qLivePerM2 = parseFloat(document.getElementById('workLiveLoad').value) || 2.50; // kN/m²
+      const V0 = parseFloat(document.getElementById('baseWindSpeed').value) || 30.0; // m/s
+      const terrain = document.getElementById('terrainCategory').value || 'B';
+      const phi = parseFloat(document.getElementById('solidityRatio').value) || 0.75;
+      const G = parseFloat(document.getElementById('gustFactor').value) || 1.95;
+      const Cf = parseFloat(document.getElementById('windForceCoeff').value) || 1.30;
+
+      // Wall tie & Foundation
+      const tieV = parseFloat(document.getElementById('tieSpacingV').value) || 3.8;
+      const tieH = parseFloat(document.getElementById('tieSpacingH').value) || 3.6;
+      const tieCap = parseFloat(document.getElementById('tieCapacity').value) || 9.80; // kN
+      const soilQa = parseFloat(document.getElementById('soilBearingCapacity').value) || 100.0; // kN/m²
+
+      // 4. Wind Load Calculation (KDS 41 10 15)
+      // Height factor Kzr based on terrain
+      let alpha = 0.22, Zg = 350, b = 0.8;
+      if (terrain === 'A') { alpha = 0.33; Zg = 450; b = 0.6; }
+      else if (terrain === 'B') { alpha = 0.22; Zg = 350; b = 0.8; }
+      else if (terrain === 'C') { alpha = 0.15; Zg = 250; b = 1.0; }
+      else if (terrain === 'D') { alpha = 0.10; Zg = 200; b = 1.15; }
+
+      const refZ = Math.min(H, Zg);
+      const Kzr = Math.max(0.6, b * Math.pow(refZ / Zg, alpha));
+      const Vz = V0 * Math.sqrt(Kzr);
+      const qz = 0.613 * Math.pow(Vz, 2) / 1000.0; // kN/m²
+      const designWindP = qz * G * Cf * phi; // kN/m²
+
+      document.getElementById('calculatedWindPressure').innerText = designWindP.toFixed(3) + ' kN/m²';
+      document.getElementById('windQzDetail').innerHTML = `Vz = ${Vz.toFixed(1)} m/s (고도보정)<br>qz = ${qz.toFixed(3)} kN/m²`;
+      document.getElementById('windKzrDetail').innerHTML = `조도 ${terrain} (α=${alpha}, Zg=${Zg}m)<br>Kzr = ${Kzr.toFixed(2)} (H=${H}m 위치)`;
+      document.getElementById('windPDetail').innerHTML = `P = ${designWindP.toFixed(3)} kN/m²<br>(G=${G}, Cf=${Cf}, φ=${phi})`;
+
+      // 5. Vertical Scaffolding Column Check (수직재 축방향 압축/좌굴 검토)
+      // Dead Load Estimation per post
+      const deckSelfWeightPerM2 = 0.15; // kN/m² (Steel safety deck ~15kg/m2)
+      const deckDeadLoadPerTier = deckSelfWeightPerM2 * (L * B) / 4.0; // per single corner post
+      const pipeWeightPerTier = (vPipe.selfWeightPerM * h + (hPipe.selfWeightPerM * (L + B) / 2)) * 9.8 / 1000; // kN
+      const miscTiesNetsPerTier = 0.05; // kN/tier
+      const totalDeadLoadPerPost = totalTiers * (deckDeadLoadPerTier + pipeWeightPerTier + miscTiesNetsPerTier);
+
+      // Live Load per post
+      const liveLoadPerPost = (qLivePerM2 * (L * B) / 4.0) * activeWorkFloors;
+
+      // Wind overturning load contribution to column (편심/풍하중 전도모멘트에 따른 부가축력)
+      const totalWindLateralPerBay = designWindP * (L * H);
+      const overturningMoment = totalWindLateralPerBay * (H / 2.0);
+      const windAxialContribution = overturningMoment / (B * 2.0 * Math.max(2, totalTiers));
+
+      const totalDesignAxialN = totalDeadLoadPerPost + liveLoadPerPost + windAxialContribution; // in kN
+
+      // Slenderness & Allowable Buckling Stress according to KDS 21 60
+      const effectiveLengthK = 1.0;
+      const effectiveLengthMm = effectiveLengthK * h * 1000; // mm
+      const radiusOfGyrationMm = vPipe.r * 10; // mm
+      const lambda = effectiveLengthMm / radiusOfGyrationMm;
+
+      const E_steel = vPipe.E; // MPa
+      const Fy_steel = vPipe.Fy; // MPa
+      const limitLambda = Math.PI * Math.sqrt(E_steel / (0.6 * Fy_steel));
+      const safetyFactorNu = 1.5;
+
+      let fca = 0;
+      if (lambda <= limitLambda) {
+        fca = (1.0 - 0.4 * Math.pow(lambda / limitLambda, 2)) * (Fy_steel / safetyFactorNu);
+      } else {
+        fca = (0.6 * Fy_steel) / (Math.pow(lambda / limitLambda, 2) * safetyFactorNu);
+      }
+
+      // Acting compressive stress
+      const postAreaMm2 = vPipe.A * 100; // mm²
+      const actingStressFc = (totalDesignAxialN * 1000) / postAreaMm2; // MPa
+      const ratioPost = actingStressFc / fca;
+
+      // 6. Horizontal Member Check (수평재 / 장선 휨모멘트 및 처짐)
+      // Deck load distributed along beam (장선 폭 B에 대한 부담)
+      const deckTributaryWidth = B / 2.0;
+      const beamDistributedW = (deckSelfWeightPerM2 + qLivePerM2) * deckTributaryWidth; // kN/m
+      const beamMoment = (beamDistributedW * Math.pow(L, 2)) / 8.0; // kN·m
+      const hZ_mm3 = hPipe.Z * 1000; // mm³
+      const beamFb = (beamMoment * 1e6) / hZ_mm3; // MPa
+      const allowableFb = 0.6 * hPipe.Fy; // MPa
+      const ratioBeamFlexure = beamFb / allowableFb;
+
+      // Deflection: δ = 5 w L⁴ / (384 E I)
+      const w_N_per_mm = beamDistributedW; // 1 kN/m = 1 N/mm
+      const L_mm = L * 1000;
+      const hI_mm4 = hPipe.I * 10000; // cm4 to mm4
+      const beamDelta = (5.0 * w_N_per_mm * Math.pow(L_mm, 4)) / (384.0 * hPipe.E * hI_mm4); // mm
+      const allowableDelta = L_mm / 300.0; // mm (1/300 standard)
+      const ratioBeamDeflection = beamDelta / allowableDelta;
+      const ratioBeam = Math.max(ratioFlexure = ratioBeamFlexure, ratioBeamDeflection);
+
+      // 7. Wall Tie Check (벽이음재 인장/압축)
+      const tieTributaryArea = tieV * tieH; // m²
+      const tieLoadRw = tieTributaryArea * designWindP; // kN
+      const ratioTie = tieLoadRw / tieCap;
+
+      // 8. Ground Bearing Capacity Check (기초 지반 지내력)
+      const basePlateArea = 0.20 * 0.30; // 200mm x 300mm standard timber/steel sole plate = 0.06 m²
+      const soilPressureQ = totalDesignAxialN / basePlateArea; // kN/m²
+      const ratioSoil = soilPressureQ / soilQa;
+
+      // Store results
+      calcResults = {
+        H, L, B, h, totalTiers, activeWorkFloors, vPipe, hPipe,
+        totalDesignAxialN, lambda, limitLambda, fca, actingStressFc, ratioPost,
+        beamDistributedW, beamMoment, beamFb, allowableFb, beamDelta, allowableDelta, ratioBeam,
+        tieTributaryArea, tieLoadRw, tieCap, ratioTie,
+        basePlateArea, soilPressureQ, soilQa, ratioSoil,
+        designWindP, qz
+      };
+
+      // Render Details
+      document.getElementById('calcNu').innerText = totalDesignAxialN.toFixed(2) + ' kN';
+      document.getElementById('calcLambda').innerText = `${lambda.toFixed(1)} (기준 ≤ 200)`;
+      document.getElementById('calcFca').innerText = fca.toFixed(1) + ' MPa';
+      document.getElementById('calcFc').innerText = actingStressFc.toFixed(1) + ' MPa';
+      
+      const elPostRatio = document.getElementById('calcRatioPost');
+      elPostRatio.innerText = `${ratioPost.toFixed(3)} ≤ 1.00 (${ratioPost <= 1.0 ? 'OK' : 'NG'})`;
+      elPostRatio.className = `pt-1.5 font-bold text-right ${ratioPost <= 1.0 ? 'text-emerald-700' : 'text-rose-600'}`;
+      document.getElementById('postBadge').innerText = ratioPost <= 1.0 ? `SAFE (${(ratioPost * 100).toFixed(1)}%)` : `UNSAFE (${(ratioPost * 100).toFixed(1)}%)`;
+      document.getElementById('postBadge').className = `text-xs font-bold px-2 py-0.5 rounded-full ${ratioPost <= 1.0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 animate-pulse'}`;
+      document.getElementById('barPost').style.width = Math.min(100, (ratioPost * 100)).toFixed(1) + '%';
+      document.getElementById('barPost').className = `h-2 rounded-full transition-all duration-500 ${ratioPost <= 1.0 ? 'bg-emerald-500' : 'bg-rose-500'}`;
+
+      // Beam Details
+      document.getElementById('calcBeamW').innerText = beamDistributedW.toFixed(2) + ' kN/m';
+      document.getElementById('calcBeamM').innerText = beamMoment.toFixed(3) + ' kN·m';
+      document.getElementById('calcBeamFb').innerText = `${beamFb.toFixed(1)} MPa (허용 ${allowableFb.toFixed(0)})`;
+      document.getElementById('calcBeamDefl').innerText = `${beamDelta.toFixed(2)} mm (허용 ${allowableDelta.toFixed(1)} mm)`;
+      document.getElementById('calcRatioBeam').innerText = `${ratioBeam.toFixed(3)} ≤ 1.00 (${ratioBeam <= 1.0 ? 'OK' : 'NG'})`;
+      document.getElementById('beamBadge').innerText = ratioBeam <= 1.0 ? `SAFE (${(ratioBeam * 100).toFixed(1)}%)` : `UNSAFE (${(ratioBeam * 100).toFixed(1)}%)`;
+      document.getElementById('beamBadge').className = `text-xs font-bold px-2 py-0.5 rounded-full ${ratioBeam <= 1.0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 animate-pulse'}`;
+      document.getElementById('barBeam').style.width = Math.min(100, (ratioBeam * 100)).toFixed(1) + '%';
+      document.getElementById('barBeam').className = `h-2 rounded-full transition-all duration-500 ${ratioBeam <= 1.0 ? 'bg-indigo-500' : 'bg-rose-500'}`;
+
+      // Tie Details
+      document.getElementById('calcTieArea').innerText = tieTributaryArea.toFixed(2) + ' m²';
+      document.getElementById('calcTieLoad').innerText = tieLoadRw.toFixed(2) + ' kN';
+      document.getElementById('calcTieCap').innerText = tieCap.toFixed(2) + ' kN';
+      document.getElementById('calcRatioTie').innerText = `${ratioTie.toFixed(3)} ≤ 1.00 (${ratioTie <= 1.0 ? 'OK' : 'NG'})`;
+      document.getElementById('tieBadge').innerText = ratioTie <= 1.0 ? `SAFE (${(ratioTie * 100).toFixed(1)}%)` : `UNSAFE (${(ratioTie * 100).toFixed(1)}%)`;
+      document.getElementById('tieBadge').className = `text-xs font-bold px-2 py-0.5 rounded-full ${ratioTie <= 1.0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 animate-pulse'}`;
+      document.getElementById('barTie').style.width = Math.min(100, (ratioTie * 100)).toFixed(1) + '%';
+      document.getElementById('barTie').className = `h-2 rounded-full transition-all duration-500 ${ratioTie <= 1.0 ? 'bg-amber-500' : 'bg-rose-500'}`;
+
+      // Soil Details
+      document.getElementById('calcPbase').innerText = totalDesignAxialN.toFixed(2) + ' kN';
+      document.getElementById('calcSoilPressure').innerText = `${soilPressureQ.toFixed(1)} kN/m² (허용 ${soilQa.toFixed(0)})`;
+      document.getElementById('calcRatioSoil').innerText = `${ratioSoil.toFixed(3)} ≤ 1.00 (${ratioSoil <= 1.0 ? 'OK' : 'NG'})`;
+      document.getElementById('soilBadge').innerText = ratioSoil <= 1.0 ? `SAFE (${(ratioSoil * 100).toFixed(1)}%)` : `UNSAFE (${(ratioSoil * 100).toFixed(1)}%)`;
+      document.getElementById('soilBadge').className = `text-xs font-bold px-2 py-0.5 rounded-full ${ratioSoil <= 1.0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800 animate-pulse'}`;
+      document.getElementById('barSoil').style.width = Math.min(100, (ratioSoil * 100)).toFixed(1) + '%';
+      document.getElementById('barSoil').className = `h-2 rounded-full transition-all duration-500 ${ratioSoil <= 1.0 ? 'bg-rose-500' : 'bg-rose-500'}`;
+
+      // Mini top bar percentages
+      document.getElementById('ratioPostMini').innerText = (ratioPost * 100).toFixed(1) + '%';
+      document.getElementById('ratioBeamMini').innerText = (ratioBeam * 100).toFixed(1) + '%';
+      document.getElementById('ratioTieMini').innerText = (ratioTie * 100).toFixed(1) + '%';
+      document.getElementById('ratioSoilMini').innerText = (ratioSoil * 100).toFixed(1) + '%';
+
+      // Master Overall Safety Banner
+      const maxRatio = Math.max(ratioPost, ratioBeam, ratioTie, ratioSoil);
+      const isAllSafe = maxRatio <= 1.0;
+      const banner = document.getElementById('overallStatusBanner');
+      const bannerIcon = document.getElementById('overallStatusIcon');
+      const bannerTitle = document.getElementById('overallStatusTitle');
+      const bannerSub = document.getElementById('overallStatusSub');
+      const badgeMax = document.getElementById('maxStressBadge');
+
+      if (isAllSafe) {
+        banner.className = 'rounded-xl border p-4 bg-emerald-50 border-emerald-300 text-emerald-950 flex flex-wrap items-center justify-between shadow-sm transition-all';
+        bannerIcon.className = 'w-11 h-11 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-xl shadow-md';
+        bannerIcon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+        bannerTitle.innerText = '구조안전성 종합 판정 : 만족 (ALL SAFE)';
+        bannerSub.innerText = '수직재 좌굴, 수평재 휨·처짐, 벽이음 인장, 지반 지내력 전 항목이 허용기준치 이내입니다.';
+        badgeMax.innerText = `최대검토비 ${(maxRatio * 100).toFixed(1)}%`;
+        badgeMax.className = 'text-xs bg-emerald-200 text-emerald-800 font-bold px-2 py-0.5 rounded-full';
+      } else {
+        banner.className = 'rounded-xl border p-4 bg-rose-50 border-rose-300 text-rose-950 flex flex-wrap items-center justify-between shadow-sm transition-all';
+        bannerIcon.className = 'w-11 h-11 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl shadow-md animate-pulse';
+        bannerIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+        bannerTitle.innerText = '구조안전성 종합 판정 : 기준 초과 (UNSAFE)';
+        bannerSub.innerText = '일부 부재의 작용 응력이 기준치를 초과했습니다. 기둥간격을 좁히거나 벽이음 간격을 단축하십시오.';
+        badgeMax.innerText = `최대검토비 ${(maxRatio * 100).toFixed(1)}% (초과)`;
+        badgeMax.className = 'text-xs bg-rose-200 text-rose-900 font-bold px-2 py-0.5 rounded-full';
+      }
+
+      // Populate Dynamic Wind Profile Bars in Tab 3
+      renderWindProfileBars(H, designWindP);
+
+      // Rebuild 3D Model
+      if (sync3D && typeof renderScaffold3D === 'function') {
+        renderScaffold3D(L, B, h, totalTiers, tieV, tieH, isAllSafe);
+      }
+    }
+
+    function renderWindProfileBars(totalH, maxP) {
+      const container = document.getElementById('windProfileBars');
+      if (!container) return;
+      container.innerHTML = '';
+
+      const steps = 6;
+      for (let i = steps; i >= 1; i--) {
+        const hFraction = i / steps;
+        const currentHeight = (totalH * hFraction).toFixed(1);
+        const pFraction = Math.pow(hFraction, 0.45); // approximate wind curve
+        const curP = (maxP * pFraction).toFixed(3);
+        const barWidth = (pFraction * 100).toFixed(0);
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center text-xs gap-3';
+        row.innerHTML = `
+          <span class="w-16 font-mono text-slate-500 text-right">Z=${currentHeight}m</span>
+          <div class="flex-1 bg-slate-200 rounded-full h-3 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-400 to-indigo-600 h-3 rounded-full" style="width: ${barWidth}%"></div>
+          </div>
+          <span class="w-24 font-mono font-bold text-slate-700">${curP} kN/m²</span>
+        `;
+        container.appendChild(row);
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-blue-700', 'border-blue-600', 'shadow-sm');
+        btn.classList.add('text-slate-600', 'border-transparent');
+      });
+
+      const activePane = document.getElementById(tabId);
+      if (activePane) activePane.classList.remove('hidden');
+
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-white', 'text-blue-700', 'border-blue-600', 'shadow-sm');
+        activeBtn.classList.remove('text-slate-600', 'border-transparent');
+      }
+
+      if (tabId === 'tab-3d' && controls) {
+        onWindowResize();
+      }
+    }
+
+    function printReport() {
+      // Sync Report Data
+      document.getElementById('rptH').innerText = calcResults.H + ' m';
+      document.getElementById('rptSpan').innerText = `${calcResults.L}m × ${calcResults.B}m`;
+      document.getElementById('rptStory').innerText = calcResults.h + ' m';
+      document.getElementById('rptTiers').innerText = `${calcResults.totalTiers} 단 (작업 ${calcResults.activeWorkFloors} 층)`;
+      document.getElementById('rptPostSpec').innerText = calcResults.vPipe.name;
+      document.getElementById('rptBeamSpec').innerText = calcResults.hPipe.name;
+      document.getElementById('rptWindV').innerText = `${document.getElementById('baseWindSpeed').value} m/s (조도 ${document.getElementById('terrainCategory').value})`;
+      document.getElementById('rptLiveLoad').innerText = `${document.getElementById('workLiveLoad').value} kN/m²`;
+
+      // Results
+      document.getElementById('rptR1_val').innerText = `${calcResults.actingStressFc.toFixed(1)} MPa (Nu=${calcResults.totalDesignAxialN.toFixed(1)}kN)`;
+      document.getElementById('rptR1_all').innerText = `${calcResults.fca.toFixed(1)} MPa`;
+      document.getElementById('rptR1_rat').innerText = (calcResults.ratioPost * 100).toFixed(1) + '%';
+      document.getElementById('rptR1_jud').innerText = calcResults.ratioPost <= 1.0 ? '적합 (OK)' : '부적합 (NG)';
+
+      document.getElementById('rptR2_val').innerText = `${calcResults.beamFb.toFixed(1)} MPa (M=${calcResults.beamMoment.toFixed(2)}kNm)`;
+      document.getElementById('rptR2_all').innerText = `${calcResults.allowableFb.toFixed(1)} MPa`;
+      document.getElementById('rptR2_rat').innerText = (calcResults.ratioBeam * 100).toFixed(1) + '%';
+      document.getElementById('rptR2_jud').innerText = calcResults.ratioBeam <= 1.0 ? '적합 (OK)' : '부적합 (NG)';
+
+      document.getElementById('rptR3_val').innerText = `${calcResults.beamDelta.toFixed(2)} mm`;
+      document.getElementById('rptR3_all').innerText = `${calcResults.allowableDelta.toFixed(1)} mm (L/300)`;
+      document.getElementById('rptR3_rat').innerText = (calcResults.beamDelta / calcResults.allowableDelta * 100).toFixed(1) + '%';
+      document.getElementById('rptR3_jud').innerText = calcResults.beamDelta <= calcResults.allowableDelta ? '적합 (OK)' : '부적합 (NG)';
+
+      document.getElementById('rptR4_val').innerText = `${calcResults.tieLoadRw.toFixed(2)} kN`;
+      document.getElementById('rptR4_all').innerText = `${calcResults.tieCap.toFixed(2)} kN`;
+      document.getElementById('rptR4_rat').innerText = (calcResults.ratioTie * 100).toFixed(1) + '%';
+      document.getElementById('rptR4_jud').innerText = calcResults.ratioTie <= 1.0 ? '적합 (OK)' : '부적합 (NG)';
+
+      document.getElementById('rptR5_val').innerText = `${calcResults.soilPressureQ.toFixed(1)} kN/m²`;
+      document.getElementById('rptR5_all').innerText = `${calcResults.soilQa.toFixed(1)} kN/m²`;
+      document.getElementById('rptR5_rat').innerText = (calcResults.ratioSoil * 100).toFixed(1) + '%';
+      document.getElementById('rptR5_jud').innerText = calcResults.ratioSoil <= 1.0 ? '적합 (OK)' : '부적합 (NG)';
+
+      // Trigger standard print
+      window.print();
+    }
+
+    let scene, camera, renderer, controls;
+    let scaffoldGroup = null;
+    let safetyNetMesh = null;
+
+    function init3D() {
+      const container = document.getElementById('threeCanvasContainer');
+      if (!container) return;
+
+      const width = container.clientWidth || 600;
+      const height = container.clientHeight || 450;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0f172a); // dark slate
+
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 300);
+      camera.position.set(12, 16, 22);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 + 0.05; // prevent going underground
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+      scene.add(ambientLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(20, 40, 20);
+      dirLight.castShadow = true;
+      scene.add(dirLight);
+
+      const fillLight = new THREE.DirectionalLight(0x93c5fd, 0.4);
+      fillLight.position.set(-20, 20, -20);
+      scene.add(fillLight);
+
+      // Ground plane
+      const groundGeo = new THREE.PlaneGeometry(80, 80);
+      const groundMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.8 });
+      const ground = new THREE.Mesh(groundGeo, groundMat);
+      ground.rotation.x = -Math.PI / 2;
+      ground.position.y = 0;
+      scene.add(ground);
+
+      // Grid Helper
+      const grid = new THREE.GridHelper(60, 30, 0x3b82f6, 0x334155);
+      grid.position.y = 0.01;
+      scene.add(grid);
+
+      window.addEventListener('resize', onWindowResize);
+
+      // Initial draw
+      calculateAll(true);
+      animateLoop();
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('threeCanvasContainer');
+      if (!container || !renderer || !camera) return;
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    }
+
+    function reset3DCamera() {
+      if (!camera || !controls) return;
+      camera.position.set(12, 16, 22);
+      controls.target.set(2, 6, 0);
+      controls.update();
+    }
+
+    function toggleSafetyNet(show) {
+      if (safetyNetMesh) {
+        safetyNetMesh.visible = show;
+      }
+    }
+
+    function renderScaffold3D(L, B, h, tiers, tieV, tieH, isSafe) {
+      if (!scene) return;
+
+      if (scaffoldGroup) {
+        scene.remove(scaffoldGroup);
+      }
+      scaffoldGroup = new THREE.Group();
+
+      // We render a realistic multi-bay segment (4 spans in length, 1 span in width)
+      const baysX = 4;
+      const totalWidthX = baysX * L;
+      const displayTiers = Math.min(tiers, 25); // cap display tiers to retain 60fps
+
+      // Materials
+      const postColor = isSafe ? 0x3b82f6 : 0xef4444; // blue or red stress alert
+      const postMat = new THREE.MeshStandardMaterial({ color: postColor, metalness: 0.6, roughness: 0.3 });
+      const ledgerMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.5, roughness: 0.4 });
+      const deckMat = new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.2, roughness: 0.6 });
+      const braceMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.4, roughness: 0.5 });
+      const tieMat = new THREE.MeshStandardMaterial({ color: 0xf43f5e, metalness: 0.3, roughness: 0.3 });
+      const jackMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.2 });
+
+      const pipeRadius = 0.05; // 50mm visual radius
+      const postHeight = displayTiers * h;
+
+      // 1. Vertical Posts (수직재)
+      for (let ix = 0; ix <= baysX; ix++) {
+        const posX = ix * L;
+        for (let iz = 0; iz <= 1; iz++) {
+          const posZ = iz * B;
+
+          // Vertical Cylinder
+          const postGeo = new THREE.CylinderGeometry(pipeRadius, pipeRadius, postHeight, 12);
+          const postMesh = new THREE.Mesh(postGeo, postMat);
+          postMesh.position.set(posX, postHeight / 2, posZ);
+          scaffoldGroup.add(postMesh);
+
+          // Base Jack plate
+          const jackGeo = new THREE.BoxGeometry(0.24, 0.05, 0.24);
+          const jackMesh = new THREE.Mesh(jackGeo, jackMat);
+          jackMesh.position.set(posX, 0.025, posZ);
+          scaffoldGroup.add(jackMesh);
+        }
+      }
+
+      // 2. Horizontal Ledgers & Transoms (수평재 & 장선)
+      for (let t = 1; t <= displayTiers; t++) {
+        const posY = t * h;
+
+        // Longitudinal Ledgers (Along X)
+        for (let iz = 0; iz <= 1; iz++) {
+          const posZ = iz * B;
+          const ledgerGeo = new THREE.CylinderGeometry(pipeRadius * 0.9, pipeRadius * 0.9, totalWidthX, 10);
+          const ledgerMesh = new THREE.Mesh(ledgerGeo, ledgerMat);
+          ledgerMesh.rotation.z = Math.PI / 2;
+          ledgerMesh.position.set(totalWidthX / 2, posY, posZ);
+          scaffoldGroup.add(ledgerMesh);
+        }
+
+        // Transverse Transoms (Along Z)
+        for (let ix = 0; ix <= baysX; ix++) {
+          const posX = ix * L;
+          const transomGeo = new THREE.CylinderGeometry(pipeRadius * 0.9, pipeRadius * 0.9, B, 10);
+          const transomMesh = new THREE.Mesh(transomGeo, ledgerMat);
+          transomMesh.rotation.x = Math.PI / 2;
+          transomMesh.position.set(posX, posY, B / 2);
+          scaffoldGroup.add(transomMesh);
+        }
+
+        // Working Platforms Decks (Selected upper tiers)
+        if (t >= displayTiers - 1) {
+          for (let ix = 0; ix < baysX; ix++) {
+            const deckGeo = new THREE.BoxGeometry(L * 0.95, 0.04, B * 0.88);
+            const deckMesh = new THREE.Mesh(deckGeo, deckMat);
+            deckMesh.position.set(ix * L + L / 2, posY - 0.02, B / 2);
+            scaffoldGroup.add(deckMesh);
+          }
+        }
+      }
+
+      // 3. Diagonal Bracing (가새재)
+      for (let ix = 0; ix < baysX; ix++) {
+        for (let t = 0; t < displayTiers; t += 2) {
+          const diagLen = Math.sqrt(Math.pow(L, 2) + Math.pow(h * 2, 2));
+          const angle = Math.atan2(h * 2, L);
+
+          const braceGeo = new THREE.CylinderGeometry(pipeRadius * 0.6, pipeRadius * 0.6, diagLen, 8);
+          const braceMesh = new THREE.Mesh(braceGeo, braceMat);
+          braceMesh.position.set(ix * L + L / 2, t * h + h, 0);
+          braceMesh.rotation.z = ix % 2 === 0 ? -angle : angle;
+          scaffoldGroup.add(braceMesh);
+        }
+      }
+
+      // 4. Wall Ties Indicators (벽이음 철물)
+      const tieTiersStep = Math.max(1, Math.round(tieV / h));
+      for (let t = tieTiersStep; t <= displayTiers; t += tieTiersStep) {
+        for (let ix = 0; ix <= baysX; ix += 2) {
+          const tieGeo = new THREE.BoxGeometry(0.08, 0.08, 0.9);
+          const tieMesh = new THREE.Mesh(tieGeo, tieMat);
+          tieMesh.position.set(ix * L, t * h, B + 0.45);
+          scaffoldGroup.add(tieMesh);
+        }
+      }
+
+      // 5. Vertical Safety Net (수직보호망 시각화 메쉬)
+      const netGeo = new THREE.PlaneGeometry(totalWidthX, postHeight);
+      const netMat = new THREE.MeshStandardMaterial({
+        color: 0x1d4ed8,
+        transparent: true,
+        opacity: 0.35,
+        side: THREE.DoubleSide
+      });
+      safetyNetMesh = new THREE.Mesh(netGeo, netMat);
+      safetyNetMesh.position.set(totalWidthX / 2, postHeight / 2, -0.05);
+      scaffoldGroup.add(safetyNetMesh);
+
+      const showNet = document.getElementById('toggleNet3D')?.checked ?? true;
+      safetyNetMesh.visible = showNet;
+
+      // Center the whole scaffolding
+      scaffoldGroup.position.set(-totalWidthX / 2, 0, -B / 2);
+      scene.add(scaffoldGroup);
+
+      if (controls) {
+        controls.target.set(0, postHeight / 3, 0);
+        controls.update();
+      }
+    }
+
+    function animateLoop() {
+      requestAnimationFrame(animateLoop);
+      if (controls) controls.update();
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+      }
+    }
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', () => {
+      updatePipeProperties();
+      init3D();
+    });
+  </script>
+</body>
+</html>
