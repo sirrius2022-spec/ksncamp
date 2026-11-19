@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숲속의 기록 | 개인 캠핑 아카이브</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans KR & Noto Serif KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                        serif: ['"Noto Serif KR"', 'serif'],
+                    },
+                    colors: {
+                        forest: {
+                            50: '#f4f7f4',
+                            100: '#e3ebe3',
+                            200: '#c5d8c6',
+                            300: '#9cbba0',
+                            400: '#729978',
+                            500: '#527c59',
+                            600: '#3f6245',
+                            700: '#334e38',
+                            800: '#2a3f2e',
+                            900: '#233427',
+                        },
+                        earth: {
+                            50: '#fbf9f6',
+                            100: '#f5f0e8',
+                            200: '#e8decb',
+                            300: '#d7c5a5',
+                            400: '#c3a77c',
+                            500: '#b38e5d',
+                            600: '#a37a4e',
+                            700: '#886141',
+                            800: '#705039',
+                            900: '#5c4231',
+                        },
+                        ember: '#e06d3b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* 부드러운 스크롤 및 커스텀 스크롤바 */
+        html {
+            scroll-behavior: smooth;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fbf9f6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #9cbba0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #527c59;
+        }
+        .hero-bg {
+            background-image: linear-gradient(to bottom, rgba(35, 52, 39, 0.5), rgba(35, 52, 39, 0.7)), url('https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        @media (max-width: 768px) {
+            .hero-bg {
+                background-attachment: scroll;
+            }
+        }
+    </style>
+</head>
+<body class="bg-earth-50 text-stone-800 font-sans antialiased selection:bg-forest-200 selection:text-forest-900">
+
+    <!-- 네비게이션 바 -->
+    <nav id="navbar" class="fixed w-full z-40 transition-all duration-300 bg-transparent text-white py-4">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <a href="#" class="flex items-center space-x-2 text-xl font-serif font-bold tracking-wider">
+                <i class="fa-solid fa-campground text-ember"></i>
+                <span>숲속의 기록</span>
+            </a>
+            
+            <!-- 데스크탑 메뉴 -->
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                <a href="#about" class="hover:text-earth-300 transition">소개</a>
+                <a href="#logs" class="hover:text-earth-300 transition">캠핑 일기</a>
+                <a href="#gear" class="hover:text-earth-300 transition">나의 장비</a>
+                <a href="#checklist" class="hover:text-earth-300 transition">체크리스트</a>
+                <button onclick="openModal()" class="bg-ember hover:bg-orange-600 text-white px-4 py-2 rounded-full transition shadow-md flex items-center space-x-1">
+                    <i class="fa-solid fa-pen-nib text-xs"></i>
+                    <span>기록 남기기</span>
+                </button>
+            </div>
+
+            <!-- 모바일 메뉴 버튼 -->
+            <button id="mobile-menu-btn" class="md:hidden text-2xl focus:outline-none p-2">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- 모바일 드롭다운 메뉴 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-forest-900/95 backdrop-blur-md text-white px-6 pt-4 pb-6 space-y-4 border-t border-forest-700">
+            <a href="#about" class="block py-2 hover:text-earth-300 mobile-link">소개</a>
+            <a href="#logs" class="block py-2 hover:text-earth-300 mobile-link">캠핑 일기</a>
+            <a href="#gear" class="block py-2 hover:text-earth-300 mobile-link">나의 장비</a>
+            <a href="#checklist" class="block py-2 hover:text-earth-300 mobile-link">체크리스트</a>
+            <button onclick="openModal(); toggleMobileMenu();" class="w-full bg-ember text-white py-3 rounded-xl font-medium shadow-md">
+                <i class="fa-solid fa-pen-nib mr-1"></i> 새 캠핑 기록 쓰기
+            </button>
+        </div>
+    </nav>
+
+    <!-- 히어로 섹션 -->
+    <header class="hero-bg min-h-[85vh] flex items-center justify-center text-center text-white px-4">
+        <div class="max-w-3xl mx-auto space-y-6 animate-fade-in">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-earth-200 text-xs sm:text-sm tracking-widest uppercase border border-white/20">
+                Slow Life in the Nature
+            </span>
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-serif font-bold leading-tight">
+                자연 속에서 찾은<br class="sm:hidden"> 나만의 작은 쉼표
+            </h1>
+            <p class="text-base sm:text-lg text-earth-100 max-w-xl mx-auto font-light leading-relaxed">
+                장작 타는 소리, 새벽의 차가운 공기, 그리고 별빛 아래 마시는 따뜻한 커피 한 잔. 
+                자연과 함께한 소중한 순간들을 이곳에 기록합니다.
+            </p>
+            <div class="pt-4 flex flex-col sm:flex-row justify-center gap-4">
+                <a href="#logs" class="px-8 py-3.5 bg-forest-600 hover:bg-forest-500 text-white rounded-full font-medium transition shadow-lg">
+                    캠핑 일기 둘러보기
+                </a>
+                <a href="#gear" class="px-8 py-3.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white border border-white/30 rounded-full font-medium transition">
+                    장비 리스트 보기
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 캠퍼 프로필 & 통계 섹션 -->
+    <section id="about" class="py-16 sm:py-24 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-earth-200 flex flex-col md:flex-row items-center gap-8 md:gap-12">
+            <div class="relative shrink-0">
+                <img src="https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" 
+                     onerror="this.src='https://placehold.co/300x300/527c59/ffffff?text=Camper'"
+                     alt="캠퍼 프로필" 
+                     class="w-36 h-36 sm:w-44 sm:h-44 rounded-full object-cover border-4 border-earth-100 shadow-md">
+                <div class="absolute bottom-1 right-1 bg-ember text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md" title="솔로/부시크래프트 캠퍼">
+                    <i class="fa-solid fa-fire"></i>
+                </div>
+            </div>
+            
+            <div class="flex-1 text-center md:text-left space-y-4">
+                <div class="inline-flex items-center space-x-2 text-forest-600 font-medium text-sm">
+                    <span>CAMPER PROFILE</span>
+                    <span>•</span>
+                    <span>Since 2021</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-stone-800">안녕하세요, 자연을 닮고 싶은 캠퍼 '산들'입니다.</h2>
+                <p class="text-stone-600 leading-relaxed text-sm sm:text-base">
+                    복잡한 도심을 벗어나 주말마다 전국의 산과 계곡, 바다로 떠납니다. 
+                    거창한 장비보다는 최소한의 짐으로 자연에 머물다 흔적 없이 돌아오는 'LNT(Leave No Trace)' 캠핑을 지향합니다.
+                </p>
+                
+                <!-- 캠핑 요약 통계 -->
+                <div class="grid grid-cols-3 gap-4 pt-4 border-t border-earth-100">
+                    <div class="text-center md:text-left">
+                        <p class="text-2xl sm:text-3xl font-bold text-forest-700" id="stat-trips">42<span class="text-sm font-normal text-stone-500 ml-1">회</span></p>
+                        <p class="text-xs text-stone-500 mt-1">누적 출정 횟수</p>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <p class="text-2xl sm:text-3xl font-bold text-forest-700">68<span class="text-sm font-normal text-stone-500 ml-1">박</span></p>
+                        <p class="text-xs text-stone-500 mt-1">자연 속 하룻밤</p>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <p class="text-2xl sm:text-3xl font-bold text-forest-700">19<span class="text-sm font-normal text-stone-500 ml-1">곳</span></p>
+                        <p class="text-xs text-stone-500 mt-1">방문한 캠핑장</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 캠핑 일기 (로그) 섹션 -->
+    <section id="logs" class="py-16 bg-earth-100/60 border-y border-earth-200/60">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-10 gap-4">
+                <div>
+                    <span class="text-forest-600 font-semibold text-sm tracking-wider uppercase">Camping Journal</span>
+                    <h2 class="text-3xl font-serif font-bold text-stone-800 mt-1">나의 캠핑 일기</h2>
+                </div>
+                
+                <!-- 카테고리 필터 -->
+                <div class="flex flex-wrap gap-2" id="log-filters">
+                    <button onclick="filterLogs('all')" class="filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-forest-700 text-white transition">전체</button>
+                    <button onclick="filterLogs('솔로캠핑')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-stone-600 hover:bg-forest-50 transition border border-earth-200">솔로캠핑</button>
+                    <button onclick="filterLogs('우중캠핑')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-stone-600 hover:bg-forest-50 transition border border-earth-200">우중캠핑</button>
+                    <button onclick="filterLogs('동계캠핑')" class="filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-stone-600 hover:bg-forest-50 transition border border-earth-200">동계캠핑</button>
+                </div>
+            </div>
+
+            <!-- 일기 카드 그리드 -->
+            <div id="logs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- JavaScript로 동적 렌더링 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 나의 캠핑 장비 (기어 리스트) 섹션 -->
+    <section id="gear" class="py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <span class="text-forest-600 font-semibold text-sm tracking-wider uppercase">My Camping Gear</span>
+            <h2 class="text-3xl font-serif font-bold text-stone-800 mt-1">함께하는 장비들</h2>
+            <p class="text-stone-600 mt-3 text-sm sm:text-base">오랜 시간 손때가 묻어 더욱 애착이 가는 나만의 캠핑 장비 리스트입니다.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- 장비 카드 1 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-earth-200 hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-forest-50 text-forest-700 flex items-center justify-center text-xl mb-4 group-hover:bg-forest-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-tent"></i>
+                </div>
+                <span class="text-xs font-medium text-ember bg-orange-50 px-2.5 py-1 rounded-md">쉘터 / 텐트</span>
+                <h3 class="text-lg font-bold text-stone-800 mt-3">네이처하이크 클라우드업 2</h3>
+                <p class="text-stone-500 text-sm mt-2 leading-relaxed">가벼운 무게와 훌륭한 방수력. 백패킹과 미니멀 솔로 캠핑의 든든한 집.</p>
+                <div class="mt-4 pt-4 border-t border-earth-100 flex justify-between text-xs text-stone-400">
+                    <span>무게: 1.75kg</span>
+                    <span>사용기간: 3년</span>
+                </div>
+            </div>
+
+            <!-- 장비 카드 2 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-earth-200 hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-forest-50 text-forest-700 flex items-center justify-center text-xl mb-4 group-hover:bg-forest-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-fire-burner"></i>
+                </div>
+                <span class="text-xs font-medium text-ember bg-orange-50 px-2.5 py-1 rounded-md">화기 / 불멍</span>
+                <h3 class="text-lg font-bold text-stone-800 mt-3">피코그릴 398 화로대</h3>
+                <p class="text-stone-500 text-sm mt-2 leading-relaxed">수납 시 A4 용지 크기로 접히는 초경량 화로대. 불멍의 낭만을 완성해 줍니다.</p>
+                <div class="mt-4 pt-4 border-t border-earth-100 flex justify-between text-xs text-stone-400">
+                    <span>무게: 448g</span>
+                    <span>사용기간: 2년</span>
+                </div>
+            </div>
+
+            <!-- 장비 카드 3 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-earth-200 hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-forest-50 text-forest-700 flex items-center justify-center text-xl mb-4 group-hover:bg-forest-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-chair"></i>
+                </div>
+                <span class="text-xs font-medium text-ember bg-orange-50 px-2.5 py-1 rounded-md">퍼니처</span>
+                <h3 class="text-lg font-bold text-stone-800 mt-3">헬리녹스 체어원</h3>
+                <p class="text-stone-500 text-sm mt-2 leading-relaxed">오래 앉아 있어도 편안한 착좌감과 내구성. 어떤 지형에서도 안정적입니다.</p>
+                <div class="mt-4 pt-4 border-t border-earth-100 flex justify-between text-xs text-stone-400">
+                    <span>무게: 960g</span>
+                    <span>사용기간: 4년</span>
+                </div>
+            </div>
+
+            <!-- 장비 카드 4 -->
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-earth-200 hover:shadow-md transition group">
+                <div class="w-12 h-12 rounded-xl bg-forest-50 text-forest-700 flex items-center justify-center text-xl mb-4 group-hover:bg-forest-600 group-hover:text-white transition">
+                    <i class="fa-solid fa-mug-hot"></i>
+                </div>
+                <span class="text-xs font-medium text-ember bg-orange-50 px-2.5 py-1 rounded-md">키친 / 커피</span>
+                <h3 class="text-lg font-bold text-stone-800 mt-3">스노우피크 티탄 싱글머그</h3>
+                <p class="text-stone-500 text-sm mt-2 leading-relaxed">아침 물안개를 보며 드립 커피를 내려 마실 때 가장 빛나는 450ml 머그컵.</p>
+                <div class="mt-4 pt-4 border-t border-earth-100 flex justify-between text-xs text-stone-400">
+                    <span>무게: 70g</span>
+                    <span>사용기간: 4년</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 출정 준비 체크리스트 섹션 -->
+    <section id="checklist" class="py-16 bg-forest-900 text-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <span class="text-earth-300 font-semibold text-sm tracking-wider uppercase">Packing List</span>
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold mt-1">다음 캠핑 패킹 체크리스트</h2>
+                </div>
+                <div class="flex items-center space-x-3 bg-forest-800 px-4 py-2 rounded-full border border-forest-700">
+                    <span class="text-sm text-earth-200">패킹 진행률</span>
+                    <span id="checklist-progress" class="font-bold text-ember">0%</span>
+                </div>
+            </div>
+
+            <!-- 새 항목 추가 폼 -->
+            <form onsubmit="addChecklistItem(event)" class="flex gap-2 mb-6">
+                <input type="text" id="new-item-input" placeholder="챙겨야 할 장비를 입력하세요 (예: 침낭, 헤드랜턴)" 
+                       class="flex-1 bg-forest-800 border border-forest-700 rounded-xl px-4 py-3 text-white placeholder-forest-400 focus:outline-none focus:border-ember">
+                <button type="submit" class="bg-ember hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-medium transition shrink-0">
+                    추가
+                </button>
+            </form>
+
+            <!-- 체크리스트 목록 -->
+            <div id="checklist-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- JavaScript로 렌더링 -->
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button onclick="resetChecklist()" class="text-xs text-forest-300 hover:text-white underline">
+                    체크 상태 모두 초기화
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="bg-stone-900 text-stone-400 py-12 border-t border-stone-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-6">
+            <div class="flex items-center space-x-2 text-white font-serif font-bold text-lg">
+                <i class="fa-solid fa-campground text-ember"></i>
+                <span>숲속의 기록</span>
+            </div>
+            <p class="text-sm text-center sm:text-left">
+                자연에 머문 자리는 아름다워야 합니다. Leave No Trace.
+            </p>
+            <div class="flex space-x-4 text-lg">
+                <a href="#" class="hover:text-white transition" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="hover:text-white transition" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" class="hover:text-white transition" aria-label="Blog"><i class="fa-solid fa-book-open"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 새 캠핑 일기 작성 모달 -->
+    <div id="log-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-serif font-bold text-stone-800">새 캠핑 일기 쓰기</h3>
+                <button onclick="closeModal()" class="text-stone-400 hover:text-stone-700 text-xl p-1">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveNewLog(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">캠핑 제목</label>
+                    <input type="text" id="log-title" required placeholder="예: 가을 단풍이 물든 강원도 계곡 솔캠"
+                           class="w-full border border-earth-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-forest-600">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-stone-700 mb-1">장소 (캠핑장)</label>
+                        <input type="text" id="log-location" required placeholder="예: 홍천 밤벌오토캠핑장"
+                               class="w-full border border-earth-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-forest-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-stone-700 mb-1">테마</label>
+                        <select id="log-category" class="w-full border border-earth-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-forest-600 bg-white">
+                            <option value="솔로캠핑">솔로캠핑</option>
+                            <option value="우중캠핑">우중캠핑</option>
+                            <option value="동계캠핑">동계캠핑</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">날짜</label>
+                    <input type="date" id="log-date" required
+                           class="w-full border border-earth-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-forest-600">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-stone-700 mb-1">기록 내용</label>
+                    <textarea id="log-content" rows="4" required placeholder="그날의 날씨, 음식, 느꼈던 감정을 자유롭게 적어보세요."
+                              class="w-full border border-earth-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-forest-600"></textarea>
+                </div>
+
+                <div class="pt-2 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl border border-earth-200 text-stone-600 hover:bg-stone-50 font-medium">
+                        취소
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-forest-700 hover:bg-forest-600 text-white font-medium shadow-md">
+                        일기 저장하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 알림 토스트 메시지 (alert 대체) -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-forest-800 text-white px-6 py-3.5 rounded-2xl shadow-xl flex items-center space-x-3">
+        <i class="fa-solid fa-circle-check text-ember"></i>
+        <span id="toast-msg" class="text-sm font-medium">저장되었습니다.</span>
+    </div>
+
+    <script>
+        // 1. 초기 캠핑 일기 데이터
+        const defaultLogs = [
+            {
+                id: 1,
+                title: "새벽 물안개가 피어오르던 춘천 호숫가",
+                location: "강원 춘천시 숲속야영장",
+                date: "2026-10-18",
+                category: "솔로캠핑",
+                image: "https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                content: "아침 6시, 텐트 지퍼를 열자마자 마주한 호수의 물안개는 말로 표현할 수 없는 감동이었다. 따뜻한 드립 커피 한 잔과 함께 고요한 아침을 온전히 누렸다."
+            },
+            {
+                id: 2,
+                title: "타프 위로 떨어지는 빗소리와 장작불",
+                location: "경기 가평군 계곡캠핑장",
+                date: "2026-09-24",
+                category: "우중캠핑",
+                image: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                content: "일기예보에 비 소식이 있었지만 오히려 좋았다. 타프 아래에서 빗소리를 BGM 삼아 김치전과 막걸리를 즐기니 세상 부러울 것이 없었다."
+            },
+            {
+                id: 3,
+                title: "영하 10도의 설원 위, 화목난로의 온기",
+                location: "강원 평창군 대관령 야영지",
+                date: "2026-02-11",
+                category: "동계캠핑",
+                image: "https://images.unsplash.com/photo-1517824806704-9040b037703b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                content: "밤새 눈이 내려 온 세상이 하얗게 변했다. 텐트 안 화목난로에서 타닥타닥 장작이 타들어가는 소리 덕분에 포근한 겨울밤을 보냈다."
+            }
+        ];
+
+        // 2. 초기 체크리스트 데이터
+        const defaultChecklist = [
+            { id: 1, text: "텐트 및 그라운드시트, 팩/망치", checked: true },
+            { id: 2, text: "동계용 침낭 및 발포 매트", checked: true },
+            { id: 3, text: "화로대, 장작, 토치, 내열장갑", checked: false },
+            { id: 4, text: "메인 랜턴 및 스트링 라이트", checked: false },
+            { id: 5, text: "코펠, 버너, 이소가스, 식기류", checked: false },
+            { id: 6, text: "구급약 및 보조배터리", checked: true }
+        ];
+
+        // 상태 로드 (LocalStorage 활용)
+        let campingLogs = JSON.parse(localStorage.getItem('myCampingLogs')) || defaultLogs;
+        let checklistItems = JSON.parse(localStorage.getItem('myCampingChecklist')) || defaultChecklist;
+        let currentFilter = 'all';
+
+        // 네비게이션 스크롤 효과
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-forest-900/95', 'backdrop-blur-md', 'shadow-md', 'py-3');
+                nav.classList.remove('bg-transparent', 'py-4');
+            } else {
+                nav.classList.remove('bg-forest-900/95', 'backdrop-blur-md', 'shadow-md', 'py-3');
+                nav.classList.add('bg-transparent', 'py-4');
+            }
+        });
+
+        // 모바일 메뉴 토글
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        function toggleMobileMenu() {
+            mobileMenu.classList.toggle('hidden');
+        }
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        document.querySelectorAll('.mobile-link').forEach(link => {
+            link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+
+        // 토스트 알림 함수
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // 캠핑 일기 렌더링
+        function renderLogs() {
+            const grid = document.getElementById('logs-grid');
+            const filtered = currentFilter === 'all' 
+                ? campingLogs 
+                : campingLogs.filter(log => log.category === currentFilter);
+
+            // 통계 업데이트
+            document.getElementById('stat-trips').innerHTML = `${39 + campingLogs.length}<span class="text-sm font-normal text-stone-500 ml-1">회</span>`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-stone-500">해당 카테고리의 캠핑 일기가 아직 없습니다.</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(log => `
+                <article class="bg-white rounded-3xl overflow-hidden shadow-sm border border-earth-200 hover:shadow-lg transition duration-300 flex flex-col">
+                    <div class="relative h-56 overflow-hidden">
+                        <img src="${log.image}" 
+                             onerror="this.src='https://placehold.co/800x500/3f6245/ffffff?text=Camping+Log'"
+                             alt="${log.title}" 
+                             class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                        <span class="absolute top-4 left-4 bg-forest-900/80 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                            ${log.category}
+                        </span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <div class="flex items-center text-xs text-stone-400 space-x-2 mb-2">
+                            <span><i class="fa-solid fa-location-dot text-ember mr-1"></i>${log.location}</span>
+                            <span>•</span>
+                            <span>${log.date}</span>
+                        </div>
+                        <h3 class="text-xl font-serif font-bold text-stone-800 mb-3 leading-snug">${log.title}</h3>
+                        <p class="text-stone-600 text-sm leading-relaxed flex-1">${log.content}</p>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        // 일기 필터링
+        function filterLogs(category) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.textContent === category || (category === 'all' && btn.textContent === '전체')) {
+                    btn.className = 'filter-btn active px-4 py-2 rounded-full text-sm font-medium bg-forest-700 text-white transition';
+                } else {
+                    btn.className = 'filter-btn px-4 py-2 rounded-full text-sm font-medium bg-white text-stone-600 hover:bg-forest-50 transition border border-earth-200';
+                }
+            });
+            renderLogs();
+        }
+
+        // 모달 제어
+        function openModal() {
+            document.getElementById('log-date').valueAsDate = new Date();
+            document.getElementById('log-modal').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('log-modal').classList.add('hidden');
+        }
+
+        // 새 일기 저장
+        function saveNewLog(e) {
+            e.preventDefault();
+            const title = document.getElementById('log-title').value;
+            const location = document.getElementById('log-location').value;
+            const category = document.getElementById('log-category').value;
+            const date = document.getElementById('log-date').value;
+            const content = document.getElementById('log-content').value;
+
+            const randomImages = [
+                "https://images.unsplash.com/photo-1537905569824-f89f14cceb68?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1496080174650-637e3f22fa03?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+            ];
+
+            const newLog = {
+                id: Date.now(),
+                title,
+                location,
+                category,
+                date,
+                image: randomImages[Math.floor(Math.random() * randomImages.length)],
+                content
+            };
+
+            campingLogs.unshift(newLog);
+            localStorage.setItem('myCampingLogs', JSON.stringify(campingLogs));
+            
+            e.target.reset();
+            closeModal();
+            filterLogs('all');
+            showToast('새로운 캠핑 일기가 기록되었습니다!');
+        }
+
+        // 체크리스트 렌더링
+        function renderChecklist() {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = checklistItems.map(item => `
+                <div class="flex items-center justify-between bg-forest-800/80 border border-forest-700/80 px-4 py-3.5 rounded-xl transition hover:border-forest-500">
+                    <label class="flex items-center space-x-3 cursor-pointer flex-1 select-none">
+                        <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleCheck(${item.id})"
+                               class="w-5 h-5 rounded accent-ember cursor-pointer">
+                        <span class="${item.checked ? 'line-through text-forest-400' : 'text-earth-50'} text-sm sm:text-base transition">
+                            ${item.text}
+                        </span>
+                    </label>
+                    <button onclick="deleteChecklistItem(${item.id})" class="text-forest-400 hover:text-ember p-1 ml-2 transition" title="삭제">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                </div>
+            `).join('');
+
+            // 진행률 계산
+            const completed = checklistItems.filter(i => i.checked).length;
+            const percent = checklistItems.length === 0 ? 0 : Math.round((completed / checklistItems.length) * 100);
+            document.getElementById('checklist-progress').textContent = `${percent}%`;
+        }
+
+        function toggleCheck(id) {
+            checklistItems = checklistItems.map(item => 
+                item.id === id ? { ...item, checked: !item.checked } : item
+            );
+            localStorage.setItem('myCampingChecklist', JSON.stringify(checklistItems));
+            renderChecklist();
+        }
+
+        function addChecklistItem(e) {
+            e.preventDefault();
+            const input = document.getElementById('new-item-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            checklistItems.push({ id: Date.now(), text, checked: false });
+            localStorage.setItem('myCampingChecklist', JSON.stringify(checklistItems));
+            input.value = '';
+            renderChecklist();
+            showToast('체크리스트에 항목이 추가되었습니다.');
+        }
+
+        function deleteChecklistItem(id) {
+            checklistItems = checklistItems.filter(item => item.id !== id);
+            localStorage.setItem('myCampingChecklist', JSON.stringify(checklistItems));
+            renderChecklist();
+        }
+
+        function resetChecklist() {
+            checklistItems = checklistItems.map(item => ({ ...item, checked: false }));
+            localStorage.setItem('myCampingChecklist', JSON.stringify(checklistItems));
+            renderChecklist();
+            showToast('체크리스트가 초기화되었습니다.');
+        }
+
+        // 초기 실행
+        window.addEventListener('DOMContentLoaded', () => {
+            renderLogs();
+            renderChecklist();
+        });
+    </script>
+</body>
+</html>
